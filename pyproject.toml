@@ -11,7 +11,7 @@ dependencies = [
 ]
 
 [tool.poetry]
-packages = [{include = "arrange", from = "src"}]
+packages = [{ include = "arrange" }]
 
 
 [build-system]
