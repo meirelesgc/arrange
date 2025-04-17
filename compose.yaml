@@ -1,0 +1,30 @@
+services:
+  arrange-postgres:
+    image: pgvector/pgvector:pg17
+    container_name: arrange-postgres
+    environment:
+      POSTGRES_DB: arrange
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - arrange-postgres:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  arrange:
+    image: arrange
+    container_name: arrange
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - arrange-postgres
+    volumes:
+      - ./.env:/app/.env
+      - ./storage:/app/storage
+
+volumes:
+  arrange-postgres:
