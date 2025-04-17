@@ -6,14 +6,42 @@ authors = [
     {name = "gmcosta",email = "geu_costa@outlook.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<4.0" 
 dependencies = [
+    "fastapi[standard] (>=0.115.12,<0.116.0)"
 ]
 
 [tool.poetry]
 packages = [{ include = "arrange" }]
 
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+pytest-cov = "^6.1.1"
+taskipy = "^1.14.1"
+ruff = "^0.11.6"
+
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 79
+extend-exclude = ['migrations']
+
+[tool.ruff.lint]
+preview = true
+select = ['I', 'F', 'E', 'W', 'PL', 'PT']
+
+[tool.ruff.format]
+preview = true
+quote-style = 'single'
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = '-p no:warnings'
+
+[tool.taskipy.tasks]
+lint = 'ruff check; ruff check --fix; ruff format'
+run = 'fastapi dev arrange/app.py'
+test = 'task lint; pytest -s -x --cov=arrange -vv; coverage html'
