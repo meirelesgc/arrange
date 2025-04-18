@@ -7,6 +7,6 @@ from arrange.services import doc_service
 router = APIRouter()
 
 
-@router.get('/docs/')
+@router.get('/doc/')
 async def list_docs(conn: Connection = Depends(get_conn)):
     return await doc_service.list_docs(conn)

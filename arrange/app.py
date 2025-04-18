@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from arrange.core.database import conn
-from arrange.routers import docs
+from arrange.routers import docs, users
 
 
 @asynccontextmanager
@@ -19,6 +19,7 @@ app = FastAPI(
 )
 
 app.include_router(docs.router, tags=['docs'])
+app.include_router(users.router, tags=['users'])
 
 
 @app.get('/')
