@@ -12,7 +12,7 @@ class Connection:
         )
 
     async def connect(self):
-        await self.pool.open()
+        await self.pool.open(wait=True, timeout=self.pool.timeout)
 
     async def disconnect(self):
         await self.pool.close()
