@@ -50,3 +50,13 @@ def create_user(conn):
         return user
 
     return _create_user
+
+
+@pytest.fixture
+def get_token(client):
+    def _get_token(user):
+        data = {'username': user.email, 'password': user.password}
+        response = client.post('/token/', data=data)
+        return response.json()['access_token']
+
+    return _get_token

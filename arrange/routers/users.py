@@ -2,10 +2,12 @@ from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 
 from arrange.core.connection import Connection
 from arrange.core.database import get_conn
 from arrange.models import user_models
+from arrange.security import get_current_user
 from arrange.services import user_service
 
 router = APIRouter()
@@ -14,7 +16,7 @@ router = APIRouter()
 @router.post(
     '/user/',
     status_code=HTTPStatus.CREATED,
-    response_model=user_models.User,
+    response_model=user_models.UserResponse,
 )
 async def post_user(
     user: user_models.CreateUser,
@@ -48,6 +50,7 @@ async def get_single_user(id: UUID, conn: Connection = Depends(get_conn)):
 )
 async def put_user(
     user: user_models.User,
+    current_user: user_models.User = Depends(get_current_user),
     conn: Connection = Depends(get_conn),
 ):
     return await user_service.put_user(conn, user)
@@ -59,3 +62,11 @@ async def put_user(
 )
 async def delete_user(id: UUID, conn: Connection = Depends(get_conn)):
     return await user_service.delete_user(conn, id)
+
+
+@router.post('/token/', response_model=user_models.Token)
+async def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    conn: Connection = Depends(get_conn),
+):
+    return await user_service.login_for_access_token(conn, form_data)

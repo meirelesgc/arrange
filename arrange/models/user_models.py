@@ -2,7 +2,12 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
 
 class CreateUser(BaseModel):
@@ -18,3 +23,10 @@ class User(BaseModel):
     password: str
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: Optional[datetime] = None
+
+
+class UserResponse(BaseModel):
+    id: UUID
+    username: str
+    email: EmailStr
+    model_config = ConfigDict(from_attributes=True)

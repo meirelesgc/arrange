@@ -1,5 +1,7 @@
 from uuid import UUID
 
+from pydantic import EmailStr
+
 from arrange.core.connection import Connection
 from arrange.models import user_models
 
@@ -13,15 +15,28 @@ async def post_user(conn: Connection, user: user_models.User):
     return await conn.exec(SCRIPT_SQL, params)
 
 
-async def get_user(conn: Connection, id: UUID):
+async def get_user(conn: Connection, id: UUID = None, email: EmailStr = None):
     one = False
     params = {}
+
+    filter_id = str()
     if id:
         one = True
         params['id'] = id
-    SCRIPT_SQL = """
+        filter_id = 'AND id = %(id)s'
+
+    filter_email = str()
+    if email:
+        one = True
+        params['email'] = email
+        filter_email = 'AND email = %(email)s'
+
+    SCRIPT_SQL = f"""
         SELECT id, username, email, password, created_at, updated_at
-        FROM public.users;
+        FROM public.users
+        WHERE 1 = 1
+            {filter_id}
+            {filter_email};
         """
     return await conn.select(SCRIPT_SQL, params, one)
 

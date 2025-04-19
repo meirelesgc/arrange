@@ -10,7 +10,7 @@ def test_post_user(client):
     user = user_factory.UserFactory()
     response = client.post('/user/', json=user.model_dump(mode='json'))
     assert response.status_code == HTTPStatus.CREATED
-    assert user_models.User(**response.json())
+    assert user_models.UserResponse(**response.json())
 
 
 def test_get_users(client):
@@ -53,10 +53,14 @@ async def test_get_single_user(client, create_user):
 
 
 @pytest.mark.asyncio
-async def test_put_user(client, create_user):
+async def test_put_user(client, create_user, get_token):
     user = await create_user()
     user.username = 'updated name'
-    response = client.put('/user/', json=user.model_dump(mode='json'))
+    response = client.put(
+        '/user/',
+        headers={'Authorization': f'Bearer {get_token(user)}'},
+        json=user.model_dump(mode='json'),
+    )
     assert response.status_code == HTTPStatus.OK
     assert user_models.User(**response.json())
     assert response.json()['updated_at']
@@ -72,3 +76,15 @@ async def test_delete_user(client, create_user):
     response = client.get('/user/')
     assert response.status_code == HTTPStatus.OK
     assert len(response.json()) == LENGTH
+
+
+@pytest.mark.asyncio
+async def test_get_token(client, create_user):
+    user = await create_user()
+    data = {'username': user.email, 'password': user.password}
+    response = client.post('/token/', data=data)
+    token = response.json()
+    print(token)
+    assert response.status_code == HTTPStatus.OK
+    assert 'access_token' in token
+    assert 'token_type' in token
