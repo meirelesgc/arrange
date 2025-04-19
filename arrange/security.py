@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from http import HTTPStatus
+from typing import List
 from zoneinfo import ZoneInfo
 
 from fastapi import Depends, HTTPException
@@ -49,6 +50,19 @@ async def get_current_user(
         raise credentials_exception
 
     return user_models.User(**user)
+
+
+def authorize_user(allowed_roles: List[str]):
+    async def role_checker(current_user: dict = Depends(get_current_user)):
+        user_role = current_user.get('role')
+        if user_role not in allowed_roles:
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN,
+                detail='Not enough permissions',
+            )
+        return current_user
+
+    return role_checker
 
 
 def create_access_token(data: dict):
