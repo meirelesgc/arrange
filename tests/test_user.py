@@ -30,3 +30,15 @@ async def test_get_one_users(client, create_user):
     response = client.get('/user/')
     assert response.status_code == HTTPStatus.OK
     assert len(response.json()) == LENGTH
+
+
+@pytest.mark.asyncio
+async def test_get_two_users(client, create_user):
+    LENGTH = 2
+
+    for _ in range(0, LENGTH):
+        await create_user()
+
+    response = client.get('/user/')
+    assert response.status_code == HTTPStatus.OK
+    assert len(response.json()) == LENGTH
