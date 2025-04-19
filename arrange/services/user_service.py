@@ -17,7 +17,7 @@ from arrange.security import (
 
 
 async def post_user(conn: Connection, user: user_models.CreateUser):
-    user = user_models.User(**user.model_dump())
+    user = user_models.User(**user.model_dump(), role='DEFAULT')
     user.password = get_password_hash(user.password)
     await user_repository.post_user(conn, user)
     return user

@@ -45,9 +45,11 @@ def client(conn):
 @pytest.fixture
 def create_user(conn):
     async def _create_user(**kwargs):
-        user = user_factory.UserFactory(**kwargs)
-        await user_service.post_user(conn, user)
-        return user
+        raw_user = user_factory.CreateUserFactory(**kwargs)
+        password = raw_user.password
+        created_user = await user_service.post_user(conn, raw_user)
+        created_user.password = password
+        return created_user
 
     return _create_user
 

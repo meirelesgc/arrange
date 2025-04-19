@@ -32,7 +32,7 @@ async def get_user(conn: Connection, id: UUID = None, email: EmailStr = None):
         filter_email = 'AND email = %(email)s'
 
     SCRIPT_SQL = f"""
-        SELECT id, username, email, password, created_at, updated_at
+        SELECT id, username, email, role, password, created_at, updated_at
         FROM public.users
         WHERE 1 = 1
             {filter_id}

@@ -10,7 +10,7 @@ from pwdlib import PasswordHash
 from arrange.core.connection import Connection
 from arrange.core.database import get_conn
 
-SECRET_KEY = 'your-secret-key'
+SECRET_KEY = 'your-secret-key'  # Buscar do .env
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 pwd_context = PasswordHash.recommended()

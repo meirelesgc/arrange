@@ -67,9 +67,24 @@ async def test_put_user(client, create_user, get_token):
 
 
 @pytest.mark.asyncio
-async def test_delete_user(client, create_user):
+async def test_put_user_not_authenticated(client, create_user):
     user = await create_user()
-    response = client.delete(f'/user/{user.id}/')
+    user.username = 'updated name'
+    response = client.put(
+        '/user/',
+        headers={'Authorization': 'Bearer Not authenticated'},
+        json=user.model_dump(mode='json'),
+    )
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+
+@pytest.mark.asyncio
+async def test_delete_user(client, create_user, get_token):
+    user = await create_user()
+    response = client.delete(
+        f'/user/{user.id}/',
+        headers={'Authorization': f'Bearer {get_token(user)}'},
+    )
     assert response.status_code == HTTPStatus.NO_CONTENT
 
     LENGTH = 0
@@ -84,7 +99,6 @@ async def test_get_token(client, create_user):
     data = {'username': user.email, 'password': user.password}
     response = client.post('/token/', data=data)
     token = response.json()
-    print(token)
     assert response.status_code == HTTPStatus.OK
     assert 'access_token' in token
     assert 'token_type' in token
