@@ -51,3 +51,11 @@ async def put_user(
     conn: Connection = Depends(get_conn),
 ):
     return await user_service.put_user(conn, user)
+
+
+@router.delete(
+    '/user/{id}/',
+    status_code=HTTPStatus.NO_CONTENT,
+)
+async def delete_user(id: UUID, conn: Connection = Depends(get_conn)):
+    return await user_service.delete_user(conn, id)

@@ -37,3 +37,12 @@ async def put_user(conn: Connection, user: user_models.User):
         WHERE id = %(id)s;
         """
     return await conn.exec(SCRIPT_SQL, params)
+
+
+async def delete_user(conn: Connection, id: UUID):
+    params = {'id': id}
+    SCRIPT_SQL = """
+        DELETE FROM public.users
+        WHERE id = %(id)s;
+        """
+    return await conn.exec(SCRIPT_SQL, params)

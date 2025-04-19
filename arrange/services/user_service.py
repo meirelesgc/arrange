@@ -21,3 +21,8 @@ async def put_user(conn: Connection, user: user_models.User):
     user.updated_at = datetime.now()
     await user_repository.put_user(conn, user)
     return user
+
+
+async def delete_user(conn: Connection, id: UUID = None):
+    users = await user_repository.delete_user(conn, id)
+    return users

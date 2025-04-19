@@ -60,3 +60,15 @@ async def test_put_user(client, create_user):
     assert response.status_code == HTTPStatus.OK
     assert user_models.User(**response.json())
     assert response.json()['updated_at']
+
+
+@pytest.mark.asyncio
+async def test_delete_user(client, create_user):
+    user = await create_user()
+    response = client.delete(f'/user/{user.id}/')
+    assert response.status_code == HTTPStatus.NO_CONTENT
+
+    LENGTH = 0
+    response = client.get('/user/')
+    assert response.status_code == HTTPStatus.OK
+    assert len(response.json()) == LENGTH
