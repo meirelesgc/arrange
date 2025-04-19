@@ -80,6 +80,23 @@ async def test_put_user_by_other_user(client, create_user, get_token):
 
 
 @pytest.mark.asyncio
+async def test_put_user_by_admin_user(
+    client, create_user, create_admin_user, get_token
+):
+    admin_user = await create_admin_user()
+    user = await create_user()
+    user.username = 'updated name'
+    response = client.put(
+        '/user/',
+        headers={'Authorization': f'Bearer {get_token(admin_user)}'},
+        json=user.model_dump(mode='json'),
+    )
+    assert response.status_code == HTTPStatus.OK
+    assert user_models.User(**response.json())
+    assert response.json()['updated_at']
+
+
+@pytest.mark.asyncio
 async def test_put_user_not_authenticated(client, create_user):
     user = await create_user()
     user.username = 'updated name'

@@ -9,9 +9,9 @@ from arrange.models import user_models
 async def post_user(conn: Connection, user: user_models.User):
     params = user.model_dump()
     SCRIPT_SQL = """
-        INSERT INTO public.users (id, username, email, password, created_at)
-        VALUES (%(id)s, %(username)s, %(email)s, %(password)s, %(created_at)s);
-        """
+        INSERT INTO public.users (id, username, email, role, password, created_at)
+        VALUES (%(id)s, %(username)s, %(email)s, %(role)s, %(password)s, %(created_at)s);
+        """  # noqa: E501
     return await conn.exec(SCRIPT_SQL, params)
 
 
