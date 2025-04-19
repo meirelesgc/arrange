@@ -20,3 +20,12 @@ async def post_user(
     conn: Connection = Depends(get_conn),
 ):
     return await user_service.post_user(user, conn)
+
+
+@router.get(
+    '/user/',
+    status_code=HTTPStatus.OK,
+    response_model=list[user_models.User],
+)
+async def get_user(conn: Connection = Depends(get_conn)):
+    return await user_service.get_user(conn)

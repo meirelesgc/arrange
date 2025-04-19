@@ -9,3 +9,11 @@ async def post_user(user: user_models.User, conn: Connection):
         VALUES (%(id)s, %(username)s, %(email)s, %(password)s, %(created_at)s);
         """
     return await conn.exec(SCRIPT_SQL, params)
+
+
+async def get_user(conn: Connection):
+    SCRIPT_SQL = """
+        SELECT id, username, password, created_at, updated_at
+        FROM public.users;
+        """
+    return await conn.select(SCRIPT_SQL)
