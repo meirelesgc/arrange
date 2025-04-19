@@ -9,6 +9,7 @@ from pwdlib import PasswordHash
 
 from arrange.core.connection import Connection
 from arrange.core.database import get_conn
+from arrange.models import user_models
 
 SECRET_KEY = 'your-secret-key'  # Buscar do .env
 ALGORITHM = 'HS256'
@@ -36,7 +37,7 @@ async def get_current_user(
         raise credentials_exception
 
     SCRIPT_SQL = """
-        SELECT id, username, email, password, created_at, updated_at
+        SELECT id, username, email, role, password, created_at, updated_at
         FROM public.users
         WHERE 1 = 1
             AND email = %(email)s;
@@ -47,7 +48,7 @@ async def get_current_user(
     if not user:
         raise credentials_exception
 
-    return user
+    return user_models.User(**user)
 
 
 def create_access_token(data: dict):

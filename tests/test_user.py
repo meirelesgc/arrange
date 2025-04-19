@@ -53,7 +53,7 @@ async def test_get_single_user(client, create_user):
 
 
 @pytest.mark.asyncio
-async def test_put_user(client, create_user, get_token):
+async def test_put_my_user(client, create_user, get_token):
     user = await create_user()
     user.username = 'updated name'
     response = client.put(
@@ -64,6 +64,19 @@ async def test_put_user(client, create_user, get_token):
     assert response.status_code == HTTPStatus.OK
     assert user_models.User(**response.json())
     assert response.json()['updated_at']
+
+
+@pytest.mark.asyncio
+async def test_put_user_by_other_user(client, create_user, get_token):
+    other_user = await create_user()
+    user = await create_user()
+    user.username = 'updated name'
+    response = client.put(
+        '/user/',
+        headers={'Authorization': f'Bearer {get_token(other_user)}'},
+        json=user.model_dump(mode='json'),
+    )
+    assert response.status_code == HTTPStatus.FORBIDDEN
 
 
 @pytest.mark.asyncio
