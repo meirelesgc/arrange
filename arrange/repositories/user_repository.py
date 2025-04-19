@@ -1,8 +1,10 @@
+from uuid import UUID
+
 from arrange.core.connection import Connection
 from arrange.models import user_models
 
 
-async def post_user(user: user_models.User, conn: Connection):
+async def post_user(conn: Connection, user: user_models.User):
     params = user.model_dump()
     SCRIPT_SQL = """
         INSERT INTO public.users (id, username, email, password, created_at)
@@ -11,9 +13,16 @@ async def post_user(user: user_models.User, conn: Connection):
     return await conn.exec(SCRIPT_SQL, params)
 
 
-async def get_user(conn: Connection):
+async def get_user(conn: Connection, id: UUID):
+    one = False
+    params = {}
+
+    if id:
+        one = True
+        params['id'] = id
+
     SCRIPT_SQL = """
         SELECT id, username, email, password, created_at, updated_at
         FROM public.users;
         """
-    return await conn.select(SCRIPT_SQL)
+    return await conn.select(SCRIPT_SQL, params, one)

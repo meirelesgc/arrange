@@ -42,3 +42,11 @@ async def test_get_two_users(client, create_user):
     response = client.get('/user/')
     assert response.status_code == HTTPStatus.OK
     assert len(response.json()) == LENGTH
+
+
+@pytest.mark.asyncio
+async def test_get_single_user(client, create_user):
+    user = await create_user()
+    response = client.get(f'/user/{user.id}/')
+    assert response.status_code == HTTPStatus.OK
+    assert user_models.User(**response.json())

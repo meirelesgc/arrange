@@ -46,7 +46,7 @@ def client(conn):
 def create_user(conn):
     async def _create_user(**kwargs):
         user = user_factory.UserFactory(**kwargs)
-        await user_service.post_user(user, conn)
+        await user_service.post_user(conn, user)
         return user
 
     return _create_user

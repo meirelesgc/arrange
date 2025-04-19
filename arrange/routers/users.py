@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
@@ -19,7 +20,7 @@ async def post_user(
     user: user_models.CreateUser,
     conn: Connection = Depends(get_conn),
 ):
-    return await user_service.post_user(user, conn)
+    return await user_service.post_user(conn, user)
 
 
 @router.get(
@@ -29,3 +30,12 @@ async def post_user(
 )
 async def get_user(conn: Connection = Depends(get_conn)):
     return await user_service.get_user(conn)
+
+
+@router.get(
+    '/user/{id}/',
+    status_code=HTTPStatus.OK,
+    response_model=user_models.User,
+)
+async def get_single_user(id: UUID, conn: Connection = Depends(get_conn)):
+    return await user_service.get_user(conn, id)
