@@ -16,13 +16,24 @@ async def post_user(conn: Connection, user: user_models.User):
 async def get_user(conn: Connection, id: UUID):
     one = False
     params = {}
-
     if id:
         one = True
         params['id'] = id
-
     SCRIPT_SQL = """
         SELECT id, username, email, password, created_at, updated_at
         FROM public.users;
         """
     return await conn.select(SCRIPT_SQL, params, one)
+
+
+async def put_user(conn: Connection, user: user_models.User):
+    params = user.model_dump()
+    SCRIPT_SQL = """
+        UPDATE public.users
+            SET username = %(username)s,
+                email = %(email)s,
+                password = %(password)s,
+                updated_at = %(updated_at)s
+        WHERE id = %(id)s;
+        """
+    return await conn.exec(SCRIPT_SQL, params)

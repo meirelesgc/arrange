@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from arrange.core.connection import Connection
@@ -14,3 +15,9 @@ async def post_user(conn: Connection, user: user_models.CreateUser):
 async def get_user(conn: Connection, id: UUID = None):
     users = await user_repository.get_user(conn, id)
     return users
+
+
+async def put_user(conn: Connection, user: user_models.User):
+    user.updated_at = datetime.now()
+    await user_repository.put_user(conn, user)
+    return user

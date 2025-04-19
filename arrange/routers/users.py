@@ -39,3 +39,15 @@ async def get_user(conn: Connection = Depends(get_conn)):
 )
 async def get_single_user(id: UUID, conn: Connection = Depends(get_conn)):
     return await user_service.get_user(conn, id)
+
+
+@router.put(
+    '/user/',
+    status_code=HTTPStatus.OK,
+    response_model=user_models.User,
+)
+async def put_user(
+    user: user_models.User,
+    conn: Connection = Depends(get_conn),
+):
+    return await user_service.put_user(conn, user)

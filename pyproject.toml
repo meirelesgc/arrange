@@ -49,6 +49,6 @@ addopts = '-p no:warnings'
 asyncio_default_fixture_loop_scope = 'function'
 
 [tool.taskipy.tasks]
-lint = 'ruff check; ruff check --fix; ruff format'
+lint = 'ruff check; ruff check --fix --unsafe-fixes; ruff format'
 run = 'fastapi dev arrange/app.py'
 test = 'task lint; pytest -s -x --cov=arrange -vv; coverage html'

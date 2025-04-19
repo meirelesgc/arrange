@@ -50,3 +50,13 @@ async def test_get_single_user(client, create_user):
     response = client.get(f'/user/{user.id}/')
     assert response.status_code == HTTPStatus.OK
     assert user_models.User(**response.json())
+
+
+@pytest.mark.asyncio
+async def test_put_user(client, create_user):
+    user = await create_user()
+    user.username = 'updated name'
+    response = client.put('/user/', json=user.model_dump(mode='json'))
+    assert response.status_code == HTTPStatus.OK
+    assert user_models.User(**response.json())
+    assert response.json()['updated_at']
