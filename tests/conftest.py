@@ -6,6 +6,8 @@ from testcontainers.postgres import PostgresContainer
 from arrange.app import app
 from arrange.core.connection import Connection
 from arrange.core.database import get_conn
+from arrange.services import user_service
+from tests.factories import user_factory
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -38,3 +40,13 @@ def client(conn):
 
     app.dependency_overrides[get_conn] = get_conn_override
     return TestClient(app)
+
+
+@pytest.fixture
+def create_user(conn):
+    async def _create_user(**kwargs):
+        user = user_factory.UserFactory(**kwargs)
+        await user_service.post_user(user, conn)
+        return user
+
+    return _create_user

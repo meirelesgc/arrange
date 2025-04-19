@@ -13,7 +13,7 @@ async def post_user(user: user_models.User, conn: Connection):
 
 async def get_user(conn: Connection):
     SCRIPT_SQL = """
-        SELECT id, username, password, created_at, updated_at
+        SELECT id, username, email, password, created_at, updated_at
         FROM public.users;
         """
     return await conn.select(SCRIPT_SQL)
