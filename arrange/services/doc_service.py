@@ -12,5 +12,7 @@ async def get_doc(conn: Connection):
 
 async def post_doc(conn: Connection, file: UploadFile):
     doc = doc_models.Doc(name=file.filename)
+    with open(f'storage/{doc.id}.pdf', 'wb') as buffer:
+        buffer.write(file.file.read())
     await doc_repository.post_doc(conn, doc)
     return doc

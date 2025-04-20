@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from pathlib import Path
 
 import pytest
 
@@ -21,3 +22,6 @@ async def test_post_doc(client, create_user, get_token):
     )
 
     assert response.status_code == HTTPStatus.CREATED
+    path = Path(f'storage/{response.json()["id"]}.pdf')
+    assert path.exists()
+    path.unlink()
