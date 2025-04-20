@@ -38,3 +38,8 @@ def get_doc_file(id: UUID):
     if not path.exists():
         raise HTTPException(status_code=404, detail='File not found')
     return FileResponse(str(path))
+
+
+@router.delete('/doc/{id}/', status_code=HTTPStatus.NO_CONTENT)
+async def delete_doc(id: UUID, conn: Connection = Depends(get_conn)):
+    return await doc_service.delete_doc(conn, id)

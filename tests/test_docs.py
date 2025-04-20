@@ -66,3 +66,24 @@ async def test_get_doc_file(client, create_doc):
 async def test_get_doc_file_not_found(client):
     response = client.get(f'/doc/{uuid4()}/file/')
     assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+@pytest.mark.asyncio
+async def test_delete_doc(client, create_doc):
+    LENGTH = 2
+
+    for _ in range(0, LENGTH):
+        doc = await create_doc(filename=f'{_}')
+
+    response = client.delete(f'/doc/{doc.id}/')
+    assert response.status_code == HTTPStatus.NO_CONTENT
+
+    response = client.get('/doc/')
+    assert response.status_code == HTTPStatus.OK
+    assert len(response.json()) == LENGTH - 1
+
+
+@pytest.mark.asyncio
+async def test_delete_doc_file_not_found(client):
+    response = client.delete(f'/doc/{uuid4()}/')
+    assert response.status_code == HTTPStatus.NOT_FOUND

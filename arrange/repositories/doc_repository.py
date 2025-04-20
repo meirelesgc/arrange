@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from arrange.core.connection import Connection
 from arrange.models import doc_models
 
@@ -19,3 +21,9 @@ async def get_doc(conn: Connection):
         FROM docs;
         """
     return await conn.select(SCRIPT_SQL)
+
+
+async def delete_doc(conn: Connection, id: UUID):
+    params = {'id': id}
+    SCRIPT_SQL = 'DELETE FROM public.docs WHERE id = %(id)s;'
+    await conn.exec(SCRIPT_SQL, params)
