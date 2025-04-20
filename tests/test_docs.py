@@ -1,5 +1,6 @@
 from http import HTTPStatus
 from pathlib import Path
+from uuid import uuid4
 
 import pytest
 
@@ -51,3 +52,17 @@ async def test_get_two_docs(client, create_doc):
     response = client.get('/doc/')
     assert response.status_code == HTTPStatus.OK
     assert len(response.json()) == LENGTH
+
+
+@pytest.mark.asyncio
+async def test_get_doc_file(client, create_doc):
+    doc = await create_doc()
+
+    response = client.get(f'/doc/{doc.id}/file/')
+    assert response.status_code == HTTPStatus.OK
+
+
+@pytest.mark.asyncio
+async def test_get_doc_file_not_found(client):
+    response = client.get(f'/doc/{uuid4()}/file/')
+    assert response.status_code == HTTPStatus.NOT_FOUND
