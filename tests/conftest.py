@@ -4,13 +4,16 @@ import pytest
 import pytest_asyncio
 from fastapi import UploadFile
 from fastapi.testclient import TestClient
+from langchain_community.embeddings import FakeEmbeddings
+from langchain_postgres import PGVector
 from testcontainers.postgres import PostgresContainer
 
 from arrange.app import app
 from arrange.core.connection import Connection
 from arrange.core.database import get_conn
+from arrange.core.vectorstore import get_vectorstore
 from arrange.services import doc_service, user_service
-from tests.factories import user_factory
+from tests.factories import doc_factory, user_factory
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -29,6 +32,19 @@ async def conn(postgres):
     await conn.disconnect()
 
 
+@pytest_asyncio.fixture
+async def vectorstore(postgres):
+    connection_url = f'postgresql+psycopg://{postgres.username}:{postgres.password}@{postgres.get_container_host_ip()}:{postgres.get_exposed_port(5432)}/{postgres.dbname}'
+    vectorstore = PGVector(
+        embeddings=FakeEmbeddings(size=256),
+        connection=connection_url,
+        use_jsonb=True,
+        async_mode=True,
+    )
+
+    yield vectorstore
+
+
 async def reset_database(conn: Connection):
     SCRIPT_SQL = 'DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;'
     await conn.exec(SCRIPT_SQL)
@@ -37,11 +53,15 @@ async def reset_database(conn: Connection):
 
 
 @pytest.fixture
-def client(conn):
+def client(conn, vectorstore):
     async def get_conn_override():
         yield conn
 
+    async def get_vectorstore_override():
+        yield vectorstore
+
     app.dependency_overrides[get_conn] = get_conn_override
+    app.dependency_overrides[get_vectorstore] = get_vectorstore_override
     return TestClient(app)
 
 
@@ -74,10 +94,14 @@ def create_admin_user(conn):
 
 
 @pytest.fixture
-def create_doc(conn):
-    async def _create_doc(filename='example.pdf', file_content=b'PDF content'):
-        file = UploadFile(filename=filename, file=BytesIO(file_content))
-        doc = await doc_service.post_doc(conn, file)
+def create_doc(conn, vectorstore):
+    async def _create_doc(filename: str = 'pdf.pdf'):
+        _, file_content, content_type = doc_factory.DocFactory()
+        file = UploadFile(
+            filename=filename,
+            file=BytesIO(file_content),
+        )
+        doc = await doc_service.post_doc(conn, vectorstore, file)
         return doc
 
     return _create_doc

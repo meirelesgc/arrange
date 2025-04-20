@@ -4,9 +4,11 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
+from langchain_core.vectorstores import VectorStore
 
 from arrange.core.connection import Connection
 from arrange.core.database import get_conn
+from arrange.core.vectorstore import get_vectorstore
 from arrange.models import doc_models, user_models
 from arrange.security import get_current_user
 from arrange.services import doc_service
@@ -23,8 +25,9 @@ async def post_doc(
     file: UploadFile = File(...),
     current_user: user_models.User = Depends(get_current_user),
     conn: Connection = Depends(get_conn),
+    vectorstore: VectorStore = Depends(get_vectorstore),
 ):
-    return await doc_service.post_doc(conn, file)
+    return await doc_service.post_doc(conn, vectorstore, file)
 
 
 @router.get('/doc/', response_model=list[doc_models.Doc])
@@ -43,3 +46,18 @@ def get_doc_file(id: UUID):
 @router.delete('/doc/{id}/', status_code=HTTPStatus.NO_CONTENT)
 async def delete_doc(id: UUID, conn: Connection = Depends(get_conn)):
     return await doc_service.delete_doc(conn, id)
+
+
+@router.post('/doc/{id}/arrange/metrics/', status_code=HTTPStatus.OK)
+async def arrange_doc_metrics(id: UUID, conn: Connection = Depends(get_conn)):
+    return await doc_service.arrange_doc_metrics(conn, id)
+
+
+@router.post('/doc/{id}/arrange/metadata/', status_code=HTTPStatus.OK)
+async def arrange_doc_metadata(id: UUID, conn: Connection = Depends(get_conn)):
+    return await doc_service.arrange_doc_metadata(conn, id)
+
+
+@router.post('/doc/{id}/arrange/patient/', status_code=HTTPStatus.OK)
+async def arrange_doc_patient(id: UUID, conn: Connection = Depends(get_conn)):
+    return await doc_service.arrange_doc_patient(conn, id)

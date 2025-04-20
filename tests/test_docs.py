@@ -4,12 +4,14 @@ from uuid import uuid4
 
 import pytest
 
+from tests.factories import doc_factory
+
 
 @pytest.mark.asyncio
 async def test_post_doc(client, create_user, get_token):
     user = await create_user()
     token = get_token(user)
-    file = {'file': ('pdf.pdf', b'pdf', 'application/pdf')}
+    file = {'file': doc_factory.DocFactory()}
 
     response = client.post(
         '/doc/',

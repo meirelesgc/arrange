@@ -14,3 +14,6 @@ class Settings(BaseSettings):
 
     def get_connection_string(self) -> str:
         return f'postgresql://{self.PG_USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DATABASE}'
+
+    def _get_connection_string(self) -> str:
+        return f'postgresql+psycopg://{self.PG_USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DATABASE}'
