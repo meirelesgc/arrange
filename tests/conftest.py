@@ -1,12 +1,15 @@
+from io import BytesIO
+
 import pytest
 import pytest_asyncio
+from fastapi import UploadFile
 from fastapi.testclient import TestClient
 from testcontainers.postgres import PostgresContainer
 
 from arrange.app import app
 from arrange.core.connection import Connection
 from arrange.core.database import get_conn
-from arrange.services import user_service
+from arrange.services import doc_service, user_service
 from tests.factories import user_factory
 
 
@@ -68,6 +71,16 @@ def create_admin_user(conn):
         return created_user
 
     return _create_admin_user
+
+
+@pytest.fixture
+def create_doc(conn):
+    async def _create_doc(filename='example.pdf', file_content=b'PDF content'):
+        file = UploadFile(filename=filename, file=BytesIO(file_content))
+        doc = await doc_service.post_doc(conn, file)
+        return doc
+
+    return _create_doc
 
 
 @pytest.fixture
