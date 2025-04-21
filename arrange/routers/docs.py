@@ -46,18 +46,3 @@ def get_doc_file(id: UUID):
 @router.delete('/doc/{id}/', status_code=HTTPStatus.NO_CONTENT)
 async def delete_doc(id: UUID, conn: Connection = Depends(get_conn)):
     return await doc_service.delete_doc(conn, id)
-
-
-@router.post('/doc/{id}/arrange/metrics/', status_code=HTTPStatus.OK)
-async def arrange_doc_metrics(id: UUID, conn: Connection = Depends(get_conn)):
-    return await doc_service.arrange_doc_metrics(conn, id)
-
-
-@router.post('/doc/{id}/arrange/metadata/', status_code=HTTPStatus.OK)
-async def arrange_doc_metadata(id: UUID, conn: Connection = Depends(get_conn)):
-    return await doc_service.arrange_doc_metadata(conn, id)
-
-
-@router.post('/doc/{id}/arrange/patient/', status_code=HTTPStatus.OK)
-async def arrange_doc_patient(id: UUID, conn: Connection = Depends(get_conn)):
-    return await doc_service.arrange_doc_patient(conn, id)

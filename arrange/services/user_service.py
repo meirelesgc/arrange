@@ -40,8 +40,7 @@ async def put_user(conn: Connection, user: user_models.User):
 
 
 async def delete_user(conn: Connection, id: UUID = None):
-    users = await user_repository.delete_user(conn, id)
-    return users
+    await user_repository.delete_user(conn, id)
 
 
 async def login_for_access_token(

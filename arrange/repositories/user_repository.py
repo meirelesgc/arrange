@@ -60,4 +60,4 @@ async def delete_user(conn: Connection, id: UUID):
         DELETE FROM public.users
         WHERE id = %(id)s;
         """
-    return await conn.exec(SCRIPT_SQL, params)
+    await conn.exec(SCRIPT_SQL, params)

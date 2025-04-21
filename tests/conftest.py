@@ -1,25 +1,36 @@
+import json
 from io import BytesIO
+from typing import override
 
 import pytest
 import pytest_asyncio
 from fastapi import UploadFile
 from fastapi.testclient import TestClient
 from langchain_community.embeddings import FakeEmbeddings
+from langchain_core.language_models.fake_chat_models import FakeChatModel
 from langchain_postgres import PGVector
 from testcontainers.postgres import PostgresContainer
 
 from arrange.app import app
 from arrange.core.connection import Connection
 from arrange.core.database import get_conn
+from arrange.core.model import get_local_model
 from arrange.core.vectorstore import get_vectorstore
-from arrange.services import doc_service, user_service
-from tests.factories import doc_factory, user_factory
+from arrange.services import doc_service, param_service, user_service
+from tests.factories import doc_factory, param_factory, user_factory
 
 
 @pytest.fixture(scope='session', autouse=True)
 def postgres():
     with PostgresContainer('pgvector/pgvector:pg17') as pg:
         yield pg
+
+
+async def reset_database(conn: Connection):
+    SCRIPT_SQL = 'DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;'
+    await conn.exec(SCRIPT_SQL)
+    with open('init.sql', 'r', encoding='utf-8') as buffer:
+        await conn.exec(buffer.read())
 
 
 @pytest_asyncio.fixture
@@ -45,23 +56,32 @@ async def vectorstore(postgres):
     yield vectorstore
 
 
-async def reset_database(conn: Connection):
-    SCRIPT_SQL = 'DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;'
-    await conn.exec(SCRIPT_SQL)
-    with open('init.sql', 'r', encoding='utf-8') as buffer:
-        await conn.exec(buffer.read())
+@pytest_asyncio.fixture
+async def model():
+    class FakeModel(FakeChatModel):
+        @override
+        def _call(
+            self, messages, stop=None, run_manager=None, **kwargs
+        ) -> str:
+            return json.dumps({})
+
+    return FakeModel()
 
 
 @pytest.fixture
-def client(conn, vectorstore):
+def client(conn, vectorstore, model):
     async def get_conn_override():
         yield conn
 
     async def get_vectorstore_override():
         yield vectorstore
 
+    async def get_model_override():
+        yield model
+
     app.dependency_overrides[get_conn] = get_conn_override
     app.dependency_overrides[get_vectorstore] = get_vectorstore_override
+    app.dependency_overrides[get_local_model] = get_model_override
     return TestClient(app)
 
 
@@ -77,6 +97,16 @@ def create_user(conn):
         return created_user
 
     return _create_user
+
+
+@pytest.fixture
+def create_param(conn):
+    async def _create_param(**kwargs):
+        raw_param = param_factory.CreateParamFactory(**kwargs)
+        param = await param_service.post_param(conn, raw_param)
+        return param
+
+    return _create_param
 
 
 @pytest.fixture
