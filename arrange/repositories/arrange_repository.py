@@ -7,6 +7,31 @@ from pydantic import BaseModel
 from arrange.core.connection import Connection
 
 
+async def get_arrange_metrics(
+    conn: Connection, id: UUID, type: Literal['DETAILS', 'PATIENTS', 'METRICS']
+):
+    one = True
+    params = {'id': id, 'type': type}
+    SCRIPT_SQL = """
+        SELECT doc_id, output, status, type, duration, updated_at
+        FROM public.arranges
+        WHERE 1 = 1
+            AND type = %(type)s
+            AND doc_id = %(id)s;
+        """
+    return await conn.select(SCRIPT_SQL, params, one)
+
+
+async def post_doc(conn: Connection, id: UUID):
+    for type in ['DETAILS', 'PATIENTS', 'METRICS']:
+        params = {'id': id, 'type': type}
+        SCRIPT_SQL = """
+            INSERT INTO public.arranges(doc_id, type)
+            VALUES (%(id)s, %(type)s);
+            """
+        await conn.exec(SCRIPT_SQL, params)
+
+
 async def arrange_doc(
     conn: Connection,
     id: UUID,

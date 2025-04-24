@@ -9,7 +9,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from arrange.core.connection import Connection
 from arrange.models import doc_models
-from arrange.repositories import doc_repository
+from arrange.repositories import arrange_repository, doc_repository
 
 
 async def get_doc(conn: Connection):
@@ -67,8 +67,11 @@ async def post_doc(
     doc = doc_models.Doc(name=file.filename)
     with open(f'storage/{doc.id}.pdf', 'wb') as buffer:
         buffer.write(file.file.read())
+    # --- INSERT
     await add_doc_vectorstore(vectorstore, doc)
     await doc_repository.post_doc(conn, doc)
+    await arrange_repository.post_doc(conn, doc.id)
+    # ---
     return doc
 
 

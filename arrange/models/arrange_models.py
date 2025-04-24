@@ -1,10 +1,20 @@
 from datetime import date, datetime
-from typing import Optional
+from typing import Literal, Optional
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
 
-class DocPatient(BaseModel):
+class Arrange(BaseModel):
+    doc_id: UUID
+    output: Optional[dict] = None
+    status: str
+    type: Literal['DETAILS', 'PATIENTS', 'METRICS']
+    duration: Optional[float] = None
+    updated_at: Optional[datetime] = None
+
+
+class ArrangePatient(BaseModel):
     """
     Patient-identifying and demographic information extracted from clinical
     documents.
@@ -33,7 +43,7 @@ class DocPatient(BaseModel):
     )
 
 
-class DocDetails(BaseModel):
+class ArrangeDetails(BaseModel):
     """
     Metadados essenciais para identificação e rastreabilidade de um documento
     clínico.

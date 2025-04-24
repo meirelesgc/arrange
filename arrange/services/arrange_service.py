@@ -1,7 +1,7 @@
 import json
 from http import HTTPStatus
 from time import time
-from typing import Optional
+from typing import Literal, Optional
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -35,7 +35,9 @@ def build_details_chain(local_model: BaseChatModel):
     {query}
     """  # noqa: E501
 
-    parser = PydanticOutputParser(pydantic_object=arrange_models.DocDetails)
+    parser = PydanticOutputParser(
+        pydantic_object=arrange_models.ArrangeDetails
+    )
     prompt = PromptTemplate(
         template=template,
         input_variables=['content', 'query'],
@@ -79,7 +81,9 @@ def build_patient_chain(local_model: BaseChatModel):
         {query}
         """  # noqa: E501
 
-    parser = PydanticOutputParser(pydantic_object=arrange_models.DocPatient)
+    parser = PydanticOutputParser(
+        pydantic_object=arrange_models.ArrangePatient
+    )
     prompt = PromptTemplate(
         template=template,
         input_variables=['content', 'query'],
@@ -203,3 +207,9 @@ async def arrange_doc_metrics(
     duration = time() - start_time
     await arrange_repository.arrange_doc(conn, id, output, 'DETAILS', duration)
     return aggregated_output
+
+
+async def get_arrange(
+    conn: Connection, id: UUID, type: Literal['DETAILS', 'PATIENTS', 'METRICS']
+):
+    return await arrange_repository.get_arrange_metrics(conn, id, type)

@@ -9,6 +9,7 @@ from arrange.core.connection import Connection
 from arrange.core.database import get_conn
 from arrange.core.model import get_local_model
 from arrange.core.vectorstore import get_vectorstore
+from arrange.models import arrange_models
 from arrange.services import arrange_service
 
 router = APIRouter()
@@ -26,6 +27,15 @@ async def arrange_doc_metrics(
     )
 
 
+@router.get(
+    '/arrange/{id}/metrics/',
+    status_code=HTTPStatus.OK,
+    response_model=arrange_models.Arrange,
+)
+async def get_arrange_metrics(id: UUID, conn: Connection = Depends(get_conn)):
+    return await arrange_service.get_arrange(conn, id, 'METRICS')
+
+
 @router.post('/arrange/{id}/details/', status_code=HTTPStatus.OK)
 async def arrange_doc_details(
     id: UUID,
@@ -38,6 +48,15 @@ async def arrange_doc_details(
     )
 
 
+@router.get(
+    '/arrange/{id}/details/',
+    status_code=HTTPStatus.OK,
+    response_model=arrange_models.Arrange,
+)
+async def get_arrange_details(id: UUID, conn: Connection = Depends(get_conn)):
+    return await arrange_service.get_arrange(conn, id, 'PATIENTS')
+
+
 @router.post('/arrange/{id}/patient/', status_code=HTTPStatus.OK)
 async def arrange_doc_patient(
     id: UUID,
@@ -48,3 +67,12 @@ async def arrange_doc_patient(
     return await arrange_service.arrange_doc_patient(
         conn, vectorstore, local_model, id
     )
+
+
+@router.get(
+    '/arrange/{id}/patient/',
+    status_code=HTTPStatus.OK,
+    response_model=arrange_models.Arrange,
+)
+async def get_arrange_patient(id: UUID, conn: Connection = Depends(get_conn)):
+    return await arrange_service.get_arrange(conn, id, 'PATIENTS')
