@@ -14,7 +14,7 @@ from arrange.services import arrange_service
 router = APIRouter()
 
 
-@router.post('/doc/{id}/arrange/metrics/', status_code=HTTPStatus.OK)
+@router.post('/arrange/{id}/metrics/', status_code=HTTPStatus.OK)
 async def arrange_doc_metrics(
     id: UUID,
     conn: Connection = Depends(get_conn),
@@ -26,7 +26,7 @@ async def arrange_doc_metrics(
     )
 
 
-@router.post('/doc/{id}/arrange/details/', status_code=HTTPStatus.OK)
+@router.post('/arrange/{id}/details/', status_code=HTTPStatus.OK)
 async def arrange_doc_details(
     id: UUID,
     conn: Connection = Depends(get_conn),
@@ -38,7 +38,7 @@ async def arrange_doc_details(
     )
 
 
-@router.post('/doc/{id}/arrange/patient/', status_code=HTTPStatus.OK)
+@router.post('/arrange/{id}/patient/', status_code=HTTPStatus.OK)
 async def arrange_doc_patient(
     id: UUID,
     conn: Connection = Depends(get_conn),
