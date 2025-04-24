@@ -15,14 +15,18 @@ from arrange.services import arrange_service
 router = APIRouter()
 
 
-@router.post('/arrange/{id}/metrics/', status_code=HTTPStatus.OK)
+@router.put(
+    '/arrange/{id}/metrics/',
+    status_code=HTTPStatus.OK,
+    response_model=arrange_models.Arrange,
+)
 async def arrange_doc_metrics(
     id: UUID,
     conn: Connection = Depends(get_conn),
     vectorstore: VectorStore = Depends(get_vectorstore),
     local_model: BaseChatModel = Depends(get_local_model),
 ):
-    return await arrange_service.arrange_doc_metrics(
+    return await arrange_service.put_arrange_metrics(
         conn, vectorstore, local_model, id
     )
 
@@ -36,14 +40,18 @@ async def get_arrange_metrics(id: UUID, conn: Connection = Depends(get_conn)):
     return await arrange_service.get_arrange(conn, id, 'METRICS')
 
 
-@router.post('/arrange/{id}/details/', status_code=HTTPStatus.OK)
-async def arrange_doc_details(
+@router.put(
+    '/arrange/{id}/details/',
+    status_code=HTTPStatus.OK,
+    response_model=arrange_models.Arrange,
+)
+async def put_arrange_details(
     id: UUID,
     conn: Connection = Depends(get_conn),
     vectorstore: VectorStore = Depends(get_vectorstore),
     local_model: BaseChatModel = Depends(get_local_model),
 ):
-    return await arrange_service.arrange_doc_details(
+    return await arrange_service.put_arrange_details(
         conn, vectorstore, local_model, id
     )
 
@@ -57,14 +65,18 @@ async def get_arrange_details(id: UUID, conn: Connection = Depends(get_conn)):
     return await arrange_service.get_arrange(conn, id, 'PATIENTS')
 
 
-@router.post('/arrange/{id}/patient/', status_code=HTTPStatus.OK)
-async def arrange_doc_patient(
+@router.put(
+    '/arrange/{id}/patient/',
+    status_code=HTTPStatus.OK,
+    response_model=arrange_models.Arrange,
+)
+async def put_arrange_patient(
     id: UUID,
     conn: Connection = Depends(get_conn),
     vectorstore: VectorStore = Depends(get_vectorstore),
     local_model: BaseChatModel = Depends(get_local_model),
 ):
-    return await arrange_service.arrange_doc_patient(
+    return await arrange_service.put_arrange_patient(
         conn, vectorstore, local_model, id
     )
 

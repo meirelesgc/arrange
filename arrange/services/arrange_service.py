@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from http import HTTPStatus
 from time import time
 from typing import Literal, Optional
@@ -48,7 +49,7 @@ def build_details_chain(local_model: BaseChatModel):
     return prompt | local_model | parser
 
 
-async def arrange_doc_details(
+async def put_arrange_details(
     conn: Connection,
     vectorstore: VectorStore,
     local_model: BaseChatModel,
@@ -66,7 +67,14 @@ async def arrange_doc_details(
     await arrange_repository.arrange_doc(
         conn, id, output.model_dump_json(), 'DETAILS', duration
     )
-    return output
+    return arrange_models.Arrange(**{
+        'doc_id': id,
+        'output': output.model_dump(),
+        'status': 'DONE',
+        'type': 'DETAILS',
+        'duration': duration,
+        'updated_at': datetime.now(),
+    })
 
 
 def build_patient_chain(local_model: BaseChatModel):
@@ -94,7 +102,7 @@ def build_patient_chain(local_model: BaseChatModel):
     return prompt | local_model | parser
 
 
-async def arrange_doc_patient(
+async def put_arrange_patient(
     conn: Connection,
     vectorstore: VectorStore,
     local_model: BaseChatModel,
@@ -114,7 +122,14 @@ async def arrange_doc_patient(
     await arrange_repository.arrange_doc(
         conn, id, output.model_dump_json(), 'PATIENTS', duration
     )
-    return output
+    return {
+        'doc_id': id,
+        'output': output.model_dump(),
+        'status': 'DONE',
+        'type': 'PATIENTS',
+        'duration': duration,
+        'updated_at': datetime.now(),
+    }
 
 
 async def get_chunks_by_params(
@@ -175,7 +190,7 @@ def build_metrics_chain(
     return prompt | local_model | parser
 
 
-async def arrange_doc_metrics(
+async def put_arrange_metrics(
     conn: Connection,
     vectorstore: VectorStore,
     local_model: BaseChatModel,
@@ -205,8 +220,15 @@ async def arrange_doc_metrics(
     }
     output = json.dumps(aggregated_output)
     duration = time() - start_time
-    await arrange_repository.arrange_doc(conn, id, output, 'DETAILS', duration)
-    return aggregated_output
+    await arrange_repository.arrange_doc(conn, id, output, 'METRICS', duration)
+    return {
+        'doc_id': id,
+        'output': aggregated_output,
+        'status': 'DONE',
+        'type': 'METRICS',
+        'duration': duration,
+        'updated_at': datetime.now(),
+    }
 
 
 async def get_arrange(
