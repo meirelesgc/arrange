@@ -1,6 +1,7 @@
 from pathlib import Path
 from uuid import UUID
 
+import spacy
 from fastapi import HTTPException, UploadFile
 from langchain.schema.document import Document
 from langchain_community.document_loaders import PyPDFLoader
@@ -10,6 +11,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from arrange.core.connection import Connection
 from arrange.models import doc_models
 from arrange.repositories import arrange_repository, doc_repository
+
+nlp = spacy.load('pt_core_news_lg')
 
 
 async def get_doc(conn: Connection):
@@ -54,9 +57,24 @@ def index_chunks(chunks):
     return chunks
 
 
+def clean_documents(documents: list[Document]):
+    for doc in documents:
+        text = doc.page_content
+        spacy_doc = nlp(text)
+        spans = [ent for ent in spacy_doc.ents]
+        spans = sorted(spans, key=lambda x: x.start_char, reverse=True)
+
+        for span in spans:
+            print(f'Entidade: {span.text} - Tipo: {span.label_}')
+            start, end = span.start_char, span.end_char
+            text = text[:start] + text[end:]
+        doc.page_content = text
+
+
 async def add_doc_vectorstore(vectorstore: VectorStore, doc: doc_models.Doc):
     chunks = load_documents(doc)
     chunks = split_documents(chunks)
+    clean_documents(chunks)
     chunks = index_chunks(chunks)
     await vectorstore.aadd_documents(chunks)
 
