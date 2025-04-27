@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class Token(BaseModel):
+    id: UUID
     access_token: str
     token_type: str
 
