@@ -28,7 +28,7 @@ async def post_user(
 @router.get(
     '/user/',
     status_code=HTTPStatus.OK,
-    response_model=list[user_models.User],
+    response_model=list[user_models.UserResponse],
 )
 async def get_user(conn: Connection = Depends(get_conn)):
     return await user_service.get_user(conn)
@@ -37,7 +37,7 @@ async def get_user(conn: Connection = Depends(get_conn)):
 @router.get(
     '/user/{id}/',
     status_code=HTTPStatus.OK,
-    response_model=user_models.User,
+    response_model=user_models.UserResponse,
 )
 async def get_single_user(id: UUID, conn: Connection = Depends(get_conn)):
     return await user_service.get_user(conn, id)
