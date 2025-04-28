@@ -49,7 +49,7 @@ async def test_get_single_user(client, create_user):
     user = await create_user()
     response = client.get(f'/user/{user.id}/')
     assert response.status_code == HTTPStatus.OK
-    assert user_models.User(**response.json())
+    assert user_models.UserResponse(**response.json())
 
 
 @pytest.mark.asyncio
@@ -62,7 +62,7 @@ async def test_put_my_user(client, create_user, get_token):
         json=user.model_dump(mode='json'),
     )
     assert response.status_code == HTTPStatus.OK
-    assert user_models.User(**response.json())
+    assert user_models.UserResponse(**response.json())
     assert response.json()['updated_at']
 
 
@@ -92,7 +92,7 @@ async def test_put_user_by_admin_user(
         json=user.model_dump(mode='json'),
     )
     assert response.status_code == HTTPStatus.OK
-    assert user_models.User(**response.json())
+    assert user_models.UserResponse(**response.json())
     assert response.json()['updated_at']
 
 

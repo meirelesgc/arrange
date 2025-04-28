@@ -19,7 +19,7 @@ async def post_doc(conn: Connection, doc: doc_models.Doc):
 
 async def get_doc(conn: Connection):
     SCRIPT_SQL = """
-        SELECT id, name, created_at, updated_at
+        SELECT id, name, status, created_at, updated_at
         FROM docs;
         """
     return await conn.select(SCRIPT_SQL)

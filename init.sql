@@ -8,6 +8,7 @@ CREATE TYPE arrange_type AS ENUM ('DETAILS', 'PATIENTS', 'METRICS');
 CREATE TABLE IF NOT EXISTS docs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) UNIQUE NOT NULL,
+    status status_type NOT NULL DEFAULT 'STANDBY',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP
 );
