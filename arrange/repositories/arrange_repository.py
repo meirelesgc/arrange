@@ -1,10 +1,9 @@
-from datetime import datetime
+import json
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel
-
 from arrange.core.connection import Connection
+from arrange.models import arrange_models
 
 
 async def get_arrange_metrics(
@@ -32,24 +31,21 @@ async def post_doc(conn: Connection, id: UUID):
         await conn.exec(SCRIPT_SQL, params)
 
 
-async def arrange_doc(
-    conn: Connection,
-    id: UUID,
-    output: BaseModel,
-    type: Literal['DETAILS', 'PATIENTS', 'METRICS'],
-    duration: float,
-):
-    params = {
-        'id': id,
-        'output': output,
-        'status': 'DONE',
-        'duration': duration,
-        'type': type,
-        'updated_at': datetime.now(),
-    }
+async def arrange_doc(conn: Connection, arrange: arrange_models.Arrange):
+    params = arrange.model_dump()
+    params['output'] = json.dumps(params['output'])
+
     SCRIPT_SQL = """
         UPDATE public.arranges SET output = %(output)s, status = %(status)s,
             duration = %(duration)s, updated_at = %(updated_at)s
-        WHERE doc_id = %(id)s;
+        WHERE doc_id = %(doc_id)s;
+        """
+    await conn.exec(SCRIPT_SQL, params)
+
+    SCRIPT_SQL = """
+        INSERT INTO logs.arranges(id, doc_id, output, type, duration,
+            created_at)
+        VALUES (%(id)s, %(doc_id)s, %(output)s, %(type)s, %(duration)s,
+            %(created_at)s);
         """
     await conn.exec(SCRIPT_SQL, params)

@@ -1,16 +1,18 @@
 from datetime import date, datetime
 from typing import Literal, Optional
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
 class Arrange(BaseModel):
+    id: UUID = Field(default_factory=uuid4)
     doc_id: UUID
     output: Optional[dict] = None
     status: str
     type: Literal['DETAILS', 'PATIENTS', 'METRICS']
     duration: Optional[float] = None
+    created_at: datetime = Field(default_factory=datetime.now)
     updated_at: Optional[datetime] = None
 
 

@@ -1,6 +1,8 @@
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+CREATE SCHEMA logs;
+
 CREATE TYPE status_type AS ENUM ('STANDBY', 'IN-PROCESS', 'FAILED', 'DONE');
 CREATE TYPE role_type AS ENUM ('ADMIN', 'DEFAULT');
 CREATE TYPE arrange_type AS ENUM ('DETAILS', 'PATIENTS', 'METRICS');
@@ -34,5 +36,14 @@ CREATE TABLE IF NOT EXISTS arranges (
     status status_type NOT NULL DEFAULT 'STANDBY',
     type arrange_type NOT NULL,
     duration NUMERIC(25),
-    updated_at TIMESTAMP
+    updated_at TIMESTAMP,
+    CONSTRAINT unique_doc_type UNIQUE (doc_id, type)
+);
+CREATE TABLE IF NOT EXISTS logs.arranges (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    doc_id UUID REFERENCES docs(id) ON DELETE CASCADE,
+    output JSONB,
+    type arrange_type NOT NULL,
+    duration NUMERIC(25),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

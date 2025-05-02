@@ -27,7 +27,11 @@ def postgres():
 
 
 async def reset_database(conn: Connection):
-    SCRIPT_SQL = 'DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;'
+    SCRIPT_SQL = """
+        DROP SCHEMA IF EXISTS public CASCADE;
+        DROP SCHEMA IF EXISTS logs CASCADE;
+        CREATE SCHEMA public;
+        """
     await conn.exec(SCRIPT_SQL)
     with open('init.sql', 'r', encoding='utf-8') as buffer:
         await conn.exec(buffer.read())

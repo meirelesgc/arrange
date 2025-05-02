@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 from http import HTTPStatus
 from time import time
@@ -64,10 +63,8 @@ async def put_arrange_details(
     content = '\n\n---\n\n'.join([chunk.page_content for chunk in chunks])
     output = chain.invoke({'content': content, 'query': query})
     duration = time() - start_time
-    await arrange_repository.arrange_doc(
-        conn, id, output.model_dump_json(), 'DETAILS', duration
-    )
-    return arrange_models.Arrange(**{
+
+    arrange = arrange_models.Arrange(**{
         'doc_id': id,
         'output': output.model_dump(),
         'status': 'DONE',
@@ -75,6 +72,8 @@ async def put_arrange_details(
         'duration': duration,
         'updated_at': datetime.now(),
     })
+    await arrange_repository.arrange_doc(conn, arrange)
+    return arrange
 
 
 def build_patient_chain(local_model: BaseChatModel):
@@ -119,17 +118,16 @@ async def put_arrange_patient(
     content = '\n\n---\n\n'.join([chunk.page_content for chunk in chunks])
     output = chain.invoke({'content': content, 'query': query})
     duration = time() - start_time
-    await arrange_repository.arrange_doc(
-        conn, id, output.model_dump_json(), 'PATIENTS', duration
-    )
-    return {
+    arrange = arrange_models.Arrange(**{
         'doc_id': id,
         'output': output.model_dump(),
         'status': 'DONE',
         'type': 'PATIENTS',
         'duration': duration,
         'updated_at': datetime.now(),
-    }
+    })
+    await arrange_repository.arrange_doc(conn, arrange)
+    return arrange
 
 
 async def get_chunks_by_params(
@@ -213,22 +211,20 @@ async def put_arrange_metrics(
         output = chain.invoke({'content': content, 'query': query})
         for field, value in output.model_dump().items():
             if field not in aggregated_output:
-                aggregated_output[field] = set()
-            aggregated_output[field].add(value)
-    aggregated_output = {
-        field: list(values) for field, values in aggregated_output.items()
-    }
-    output = json.dumps(aggregated_output)
+                aggregated_output[field] = []
+            aggregated_output[field].append(value)
+
     duration = time() - start_time
-    await arrange_repository.arrange_doc(conn, id, output, 'METRICS', duration)
-    return {
+    arrange = arrange_models.Arrange(**{
         'doc_id': id,
         'output': aggregated_output,
         'status': 'DONE',
         'type': 'METRICS',
         'duration': duration,
         'updated_at': datetime.now(),
-    }
+    })
+    await arrange_repository.arrange_doc(conn, arrange)
+    return arrange
 
 
 async def get_arrange(
