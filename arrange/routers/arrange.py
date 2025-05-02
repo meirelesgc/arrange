@@ -20,7 +20,7 @@ router = APIRouter()
     status_code=HTTPStatus.OK,
     response_model=arrange_models.Arrange,
 )
-async def arrange_doc_metrics(
+async def put_arrange_metrics(
     id: UUID,
     conn: Connection = Depends(get_conn),
     vectorstore: VectorStore = Depends(get_vectorstore),
@@ -29,6 +29,19 @@ async def arrange_doc_metrics(
     return await arrange_service.put_arrange_metrics(
         conn, vectorstore, local_model, id
     )
+
+
+@router.patch(
+    '/arrange/{id}/metrics/',
+    status_code=HTTPStatus.OK,
+    response_model=arrange_models.Arrange,
+)
+async def patch_arrange_metrics(
+    id: UUID,
+    output: dict,
+    conn: Connection = Depends(get_conn),
+):
+    return await arrange_service.patch_arrange_metrics(conn, id, output)
 
 
 @router.get(

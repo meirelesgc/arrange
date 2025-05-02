@@ -212,7 +212,9 @@ async def put_arrange_metrics(
         for field, value in output.model_dump().items():
             if field not in aggregated_output:
                 aggregated_output[field] = []
-            aggregated_output[field].append(value)
+
+            if value is not None:
+                aggregated_output[field].append(value)
 
     duration = time() - start_time
     arrange = arrange_models.Arrange(**{
@@ -231,3 +233,7 @@ async def get_arrange(
     conn: Connection, id: UUID, type: Literal['DETAILS', 'PATIENTS', 'METRICS']
 ):
     return await arrange_repository.get_arrange_metrics(conn, id, type)
+
+
+async def patch_arrange_metrics(id: UUID, output: dict, conn: Connection):
+    await arrange_repository.patch_arrange_metrics(id, output, conn)

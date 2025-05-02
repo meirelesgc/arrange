@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
@@ -47,5 +48,20 @@ async def arrange_doc(conn: Connection, arrange: arrange_models.Arrange):
             created_at)
         VALUES (%(id)s, %(doc_id)s, %(output)s, %(type)s, %(duration)s,
             %(created_at)s);
+        """
+    await conn.exec(SCRIPT_SQL, params)
+
+
+async def patch_arrange_metrics(id: UUID, output: dict, conn: Connection):
+    params = {
+        'id': id,
+        'output': json.dumps(output),
+        'updated_at': datetime.now(),
+    }
+
+    SCRIPT_SQL = """
+        UPDATE public.arranges SET output = %(output)s, status = 'DONE',
+            updated_at = %(updated_at)s
+        WHERE doc_id = %(doc_id)s;
         """
     await conn.exec(SCRIPT_SQL, params)
