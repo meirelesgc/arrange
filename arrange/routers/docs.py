@@ -9,8 +9,7 @@ from langchain_core.vectorstores import VectorStore
 from arrange.core.connection import Connection
 from arrange.core.database import get_conn
 from arrange.core.vectorstore import get_vectorstore
-from arrange.models import doc_models, user_models
-from arrange.security import get_current_user
+from arrange.models import doc_models
 from arrange.services import doc_service
 
 router = APIRouter()
@@ -23,7 +22,6 @@ router = APIRouter()
 )
 async def post_doc(
     file: UploadFile = File(...),
-    current_user: user_models.User = Depends(get_current_user),
     conn: Connection = Depends(get_conn),
     vectorstore: VectorStore = Depends(get_vectorstore),
 ):

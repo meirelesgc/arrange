@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     HOST: str
     PORT: int
 
+    OPENAI_API_KEY: str
+
     class Config:
         env_file = '.env'
         env_file_encoding = 'utf-8'

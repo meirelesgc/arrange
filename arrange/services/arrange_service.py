@@ -28,8 +28,8 @@ def build_details_chain(local_model: BaseChatModel):
     template = """
     {content}
 
-    Estou avaliando suas capacidades. Com base no conteúdo fictício acima.
-    Ajude-me a estruturar um JSON contendo os metadados do arquivo.
+    Estou avaliando suas capacidades. Com base no conteúdo fictício acima
+    ajude-me a estruturar um JSON contendo os metadados do arquivo.
 
     {format_instructions}
 
