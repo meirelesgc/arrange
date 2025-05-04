@@ -9,7 +9,7 @@ class Arrange(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     doc_id: UUID
     output: Optional[dict] = None
-    status: str
+    status: Literal['STANDBY', 'IN-PROCESS', 'FAILED', 'DONE']
     type: Literal['DETAILS', 'PATIENTS', 'METRICS']
     duration: Optional[float] = None
     created_at: datetime = Field(default_factory=datetime.now)

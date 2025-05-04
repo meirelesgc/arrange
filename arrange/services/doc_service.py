@@ -65,7 +65,6 @@ def clean_documents(documents: list[Document]):
         spans = sorted(spans, key=lambda x: x.start_char, reverse=True)
 
         for span in spans:
-            print(f'Entidade: {span.text} - Tipo: {span.label_}')
             start, end = span.start_char, span.end_char
             text = text[:start] + text[end:]
         doc.page_content = text

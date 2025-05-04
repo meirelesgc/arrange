@@ -31,17 +31,11 @@ async def put_arrange_metrics(
     )
 
 
-@router.patch(
-    '/arrange/{id}/metrics/',
-    status_code=HTTPStatus.OK,
-    response_model=arrange_models.Arrange,
-)
+@router.patch('/arrange/{id}/metrics/', status_code=HTTPStatus.OK)
 async def patch_arrange_metrics(
-    id: UUID,
-    output: dict,
-    conn: Connection = Depends(get_conn),
+    id: UUID, output: dict, conn: Connection = Depends(get_conn)
 ):
-    return await arrange_service.patch_arrange_metrics(conn, id, output)
+    return await arrange_service.patch_arrange_metrics(id, output, conn)
 
 
 @router.get(
@@ -75,7 +69,7 @@ async def put_arrange_details(
     response_model=arrange_models.Arrange,
 )
 async def get_arrange_details(id: UUID, conn: Connection = Depends(get_conn)):
-    return await arrange_service.get_arrange(conn, id, 'PATIENTS')
+    return await arrange_service.get_arrange(conn, id, 'DETAILS')
 
 
 @router.put(

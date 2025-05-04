@@ -64,14 +64,14 @@ async def put_arrange_details(
     output = chain.invoke({'content': content, 'query': query})
     duration = time() - start_time
 
-    arrange = arrange_models.Arrange(**{
-        'doc_id': id,
-        'output': output.model_dump(),
-        'status': 'DONE',
-        'type': 'DETAILS',
-        'duration': duration,
-        'updated_at': datetime.now(),
-    })
+    arrange = arrange_models.Arrange(
+        doc_id=id,
+        output=output.model_dump(),
+        status='STANDBY',
+        type='DETAILS',
+        duration=duration,
+        updated_at=datetime.now(),
+    )
     await arrange_repository.arrange_doc(conn, arrange)
     return arrange
 
@@ -118,14 +118,14 @@ async def put_arrange_patient(
     content = '\n\n---\n\n'.join([chunk.page_content for chunk in chunks])
     output = chain.invoke({'content': content, 'query': query})
     duration = time() - start_time
-    arrange = arrange_models.Arrange(**{
-        'doc_id': id,
-        'output': output.model_dump(),
-        'status': 'DONE',
-        'type': 'PATIENTS',
-        'duration': duration,
-        'updated_at': datetime.now(),
-    })
+    arrange = arrange_models.Arrange(
+        doc_id=id,
+        output=output.model_dump(),
+        status='STANDBY',
+        type='PATIENTS',
+        duration=duration,
+        updated_at=datetime.now(),
+    )
     await arrange_repository.arrange_doc(conn, arrange)
     return arrange
 
@@ -217,14 +217,14 @@ async def put_arrange_metrics(
                 aggregated_output[field].append(value)
 
     duration = time() - start_time
-    arrange = arrange_models.Arrange(**{
-        'doc_id': id,
-        'output': aggregated_output,
-        'status': 'DONE',
-        'type': 'METRICS',
-        'duration': duration,
-        'updated_at': datetime.now(),
-    })
+    arrange = arrange_models.Arrange(
+        doc_id=id,
+        output=aggregated_output,
+        status='STANDBY',
+        type='METRICS',
+        duration=duration,
+        updated_at=datetime.now(),
+    )
     await arrange_repository.arrange_doc(conn, arrange)
     return arrange
 

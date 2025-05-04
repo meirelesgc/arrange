@@ -62,6 +62,6 @@ async def patch_arrange_metrics(id: UUID, output: dict, conn: Connection):
     SCRIPT_SQL = """
         UPDATE public.arranges SET output = %(output)s, status = 'DONE',
             updated_at = %(updated_at)s
-        WHERE doc_id = %(doc_id)s;
+        WHERE doc_id = %(id)s;
         """
     await conn.exec(SCRIPT_SQL, params)
