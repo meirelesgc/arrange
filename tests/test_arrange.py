@@ -55,7 +55,7 @@ async def test_arrange_metrics_without_params(client, create_doc):
 
 
 @pytest.mark.asyncio
-async def test_arrange_metrics(client, create_doc, create_param):
+async def test_put_metrics(client, create_doc, create_param):
     doc = await create_doc()
     await create_param()
     response = client.put(f'/arrange/{doc.id}/metrics/')
@@ -66,10 +66,21 @@ async def test_arrange_metrics(client, create_doc, create_param):
 
 
 @pytest.mark.asyncio
-async def test_get_arrange_metrics(client, create_doc):
+async def test_get_metrics(client, create_doc):
     doc = await create_doc()
     response = client.get(f'/arrange/{doc.id}/metrics/')
     assert response.status_code == HTTPStatus.OK
     assert response.json()['type'] == 'METRICS'
     assert response.json()['status'] == 'STANDBY'
     assert arrange_models.Arrange(**response.json())
+
+
+@pytest.mark.asyncio
+async def test_patch_metrics(client, create_doc):
+    doc = await create_doc()
+    output = {'test': ['test']}
+    response = client.patch(f'/arrange/{doc.id}/metrics/', json=output)
+    assert response.status_code == HTTPStatus.OK
+
+    response = client.get(f'/arrange/{doc.id}/metrics/')
+    assert response.json()['output'] == output

@@ -52,16 +52,22 @@ async def arrange_doc(conn: Connection, arrange: arrange_models.Arrange):
     await conn.exec(SCRIPT_SQL, params)
 
 
-async def patch_arrange_metrics(id: UUID, output: dict, conn: Connection):
+async def patch_arrange(
+    id: UUID,
+    output: dict,
+    type: Literal['DETAILS', 'PATIENTS', 'METRICS'],
+    conn: Connection,
+):
     params = {
         'id': id,
         'output': json.dumps(output),
         'updated_at': datetime.now(),
+        'type': type,
     }
 
     SCRIPT_SQL = """
         UPDATE public.arranges SET output = %(output)s, status = 'DONE',
             updated_at = %(updated_at)s
-        WHERE doc_id = %(id)s;
+        WHERE doc_id = %(id)s AND type = %(type)s;
         """
     await conn.exec(SCRIPT_SQL, params)

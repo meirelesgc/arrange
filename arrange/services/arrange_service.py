@@ -235,5 +235,10 @@ async def get_arrange(
     return await arrange_repository.get_arrange_metrics(conn, id, type)
 
 
-async def patch_arrange_metrics(id: UUID, output: dict, conn: Connection):
-    await arrange_repository.patch_arrange_metrics(id, output, conn)
+async def patch_arrange(
+    id: UUID,
+    output: dict,
+    type: Literal['DETAILS', 'PATIENTS', 'METRICS'],
+    conn: Connection,
+):
+    await arrange_repository.patch_arrange(id, output, type, conn)

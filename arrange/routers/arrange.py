@@ -35,7 +35,7 @@ async def put_arrange_metrics(
 async def patch_arrange_metrics(
     id: UUID, output: dict, conn: Connection = Depends(get_conn)
 ):
-    return await arrange_service.patch_arrange_metrics(id, output, conn)
+    return await arrange_service.patch_arrange(id, output, 'METRICS', conn)
 
 
 @router.get(
