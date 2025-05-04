@@ -33,7 +33,7 @@ async def post_doc(conn: Connection, id: UUID):
 
 
 async def arrange_doc(conn: Connection, arrange: arrange_models.Arrange):
-    params = arrange.model_dump()
+    params = arrange.model_dump(mode='json')
     params['output'] = json.dumps(params['output'])
 
     SCRIPT_SQL = """
