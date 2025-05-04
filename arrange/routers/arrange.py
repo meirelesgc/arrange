@@ -52,7 +52,7 @@ async def get_arrange_metrics(id: UUID, conn: Connection = Depends(get_conn)):
     status_code=HTTPStatus.OK,
     response_model=arrange_models.Arrange,
 )
-async def put_arrange_details(
+async def put__details(
     id: UUID,
     conn: Connection = Depends(get_conn),
     vectorstore: VectorStore = Depends(get_vectorstore),
@@ -70,6 +70,13 @@ async def put_arrange_details(
 )
 async def get_arrange_details(id: UUID, conn: Connection = Depends(get_conn)):
     return await arrange_service.get_arrange(conn, id, 'DETAILS')
+
+
+@router.patch('/arrange/{id}/details/', status_code=HTTPStatus.OK)
+async def patch_details(
+    id: UUID, output: dict, conn: Connection = Depends(get_conn)
+):
+    return await arrange_service.patch_arrange(id, output, 'DETAILS', conn)
 
 
 @router.put(
@@ -95,3 +102,10 @@ async def put_arrange_patient(
 )
 async def get_arrange_patient(id: UUID, conn: Connection = Depends(get_conn)):
     return await arrange_service.get_arrange(conn, id, 'PATIENTS')
+
+
+@router.patch('/arrange/{id}/patient/', status_code=HTTPStatus.OK)
+async def patch_patient(
+    id: UUID, output: dict, conn: Connection = Depends(get_conn)
+):
+    return await arrange_service.patch_arrange(id, output, 'PATIENTS', conn)

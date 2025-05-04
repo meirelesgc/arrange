@@ -39,7 +39,7 @@ async def arrange_doc(conn: Connection, arrange: arrange_models.Arrange):
     SCRIPT_SQL = """
         UPDATE public.arranges SET output = %(output)s, status = %(status)s,
             duration = %(duration)s, updated_at = %(updated_at)s
-        WHERE doc_id = %(doc_id)s;
+        WHERE doc_id = %(doc_id)s AND type = %(type)s;
         """
     await conn.exec(SCRIPT_SQL, params)
 
