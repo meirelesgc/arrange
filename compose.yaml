@@ -29,6 +29,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    restart: unless-stopped
     depends_on:
       arrange-postgres:
         condition: service_healthy
