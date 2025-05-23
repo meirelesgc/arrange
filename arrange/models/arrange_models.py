@@ -34,7 +34,7 @@ class ArrangePatient(BaseModel):
         default=None,
         description='Date of birth of the patient (formato: AAAA-MM-DD).',
     )
-    gender: Optional[str] = Field(
+    gender: Optional[Literal['MALE', 'FEMALE']] = Field(
         default=None, description="Patient's gender, if available."
     )
     phone: Optional[str] = Field(
@@ -42,9 +42,6 @@ class ArrangePatient(BaseModel):
     )
     email: Optional[str] = Field(
         default=None, description='Email address for contact.'
-    )
-    insurance: Optional[str] = Field(
-        default=None, description='Health insurance or coverage information.'
     )
     admission_date: Optional[date] = Field(
         default=None,
@@ -69,10 +66,16 @@ class ArrangeDetails(BaseModel):
         default=None,
         description='CNPJ da instituição responsável pelo documento.',
     )
-    document_type: Optional[str] = Field(
+    # fmt: off
+    document_type: Optional[Literal[
+            'MEDICAL_EVOLUTION', 'LABORATORY_EXAM', 'MEDICAL_PRESCRIPTION',
+            'MEDICAL_REPORT', 'FOLLOW_UP_LETTER', 'DISCHARGE_SUMMARY',
+            'MEDICAL_CERTIFICATE', 'CONSENT_TERMS', 'MEDICAL_RECORD',
+        ]] = Field(
         default=None,
         description='Tipo do documento clínico (ex: Evolução, Carta de Acompanhamento).',
     )
+    # fmt: on
     issued_by: Optional[str] = Field(
         default=None,
         description='Nome do profissional responsável pelo documento.',
