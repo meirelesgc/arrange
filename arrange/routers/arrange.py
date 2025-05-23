@@ -7,7 +7,7 @@ from langchain_core.vectorstores import VectorStore
 
 from arrange.core.connection import Connection
 from arrange.core.database import get_conn
-from arrange.core.model import get_local_model
+from arrange.core.model import get_local_model, get_model
 from arrange.core.vectorstore import get_vectorstore
 from arrange.models import arrange_models
 from arrange.services import arrange_service
@@ -24,10 +24,10 @@ async def put_arrange_metrics(
     id: UUID,
     conn: Connection = Depends(get_conn),
     vectorstore: VectorStore = Depends(get_vectorstore),
-    local_model: BaseChatModel = Depends(get_local_model),
+    model: BaseChatModel = Depends(get_model),
 ):
     return await arrange_service.put_arrange_metrics(
-        conn, vectorstore, local_model, id
+        conn, vectorstore, model, id
     )
 
 

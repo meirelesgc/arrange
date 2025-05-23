@@ -2,7 +2,7 @@ from datetime import date, datetime
 from typing import Literal, Optional
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class Arrange(BaseModel):
@@ -16,17 +16,31 @@ class Arrange(BaseModel):
     updated_at: Optional[datetime] = None
 
 
-class ArrangePatient(BaseModel):
-    """
-    Patient-identifying and demographic information extracted from clinical
-    documents.
-    """
+COMMON_DATE_FORMATS = (
+    '%d/%m/%Y',
+    '%Y-%m-%d',
+    '%d-%m-%Y',
+    '%m/%d/%Y',
+    '%Y-%m-%d %H:%M',
+)
 
+
+def try_parse_date(value: str) -> date:
+    for fmt in COMMON_DATE_FORMATS:
+        try:
+            return datetime.strptime(value, fmt).date()
+        except ValueError:
+            continue
+    raise ValueError(f'Data inválida: formato desconhecido ({value}).')
+
+
+class ArrangePatient(BaseModel):
     full_name: Optional[str] = Field(
         default=None, description='Full name of the patient.'
     )
     date_of_birth: Optional[date] = Field(
-        default=None, description='Date of birth of the patient.'
+        default=None,
+        description='Date of birth of the patient (formato: AAAA-MM-DD).',
     )
     gender: Optional[str] = Field(
         default=None, description="Patient's gender, if available."
@@ -41,16 +55,21 @@ class ArrangePatient(BaseModel):
         default=None, description='Health insurance or coverage information.'
     )
     admission_date: Optional[date] = Field(
-        default=None, description='Date of hospital admission.'
+        default=None,
+        description='Date of hospital admission (formato: AAAA-MM-DD).',
     )
+
+    @field_validator('date_of_birth', 'admission_date', mode='before')
+    @classmethod
+    def parse_flexible_date(cls, v):
+        if isinstance(v, date):
+            return v
+        if not isinstance(v, str):
+            raise ValueError('Data inválida: valor não é string nem date.')
+        return try_parse_date(v)
 
 
 class ArrangeDetails(BaseModel):
-    """
-    Metadados essenciais para identificação e rastreabilidade de um documento
-    clínico.
-    """
-
     hospital_name: Optional[str] = Field(
         default=None, description='Nome do hospital emissor do documento.'
     )
@@ -60,19 +79,22 @@ class ArrangeDetails(BaseModel):
     )
     document_type: Optional[str] = Field(
         default=None,
-        description=(
-            'Tipo do documento clínico '
-            '(ex: Evolução, Carta de Acompanhamento).'
-        ),
+        description='Tipo do documento clínico (ex: Evolução, Carta de Acompanhamento).',
     )
     issued_by: Optional[str] = Field(
         default=None,
         description='Nome do profissional responsável pelo documento.',
     )
-    printing_datetime: Optional[datetime] = Field(
+    printing_datetime: Optional[date] = Field(
         default=None,
-        description=(
-            'Data e hora de emissão ou impressão do documento'
-            '(formato: AAAA-MM-DD HH:MM:SS).'
-        ),
+        description='Data de emissão ou impressão do documento (formato: AAAA-MM-DD).',
     )
+
+    @field_validator('printing_datetime', mode='before')
+    @classmethod
+    def parse_flexible_date(cls, v):
+        if isinstance(v, date):
+            return v
+        if not isinstance(v, str):
+            raise ValueError('Data inválida: valor não é string nem date.')
+        return try_parse_date(v)

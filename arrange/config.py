@@ -10,6 +10,8 @@ class Settings(BaseSettings):
 
     OPENAI_API_KEY: str
 
+    OLLAMA_BASE_URL: str = 'http://localhost:11434'
+
     class Config:
         env_file = '.env'
         env_file_encoding = 'utf-8'

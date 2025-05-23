@@ -191,7 +191,7 @@ def build_metrics_chain(
 async def put_arrange_metrics(
     conn: Connection,
     vectorstore: VectorStore,
-    local_model: BaseChatModel,
+    model: BaseChatModel,
     id: UUID,
 ):
     start_time = time()
@@ -205,7 +205,7 @@ async def put_arrange_metrics(
 
     aggregated_output = {}
     for chunk in chunks.values():
-        chain = build_metrics_chain(local_model, chunk['params'])
+        chain = build_metrics_chain(model, chunk['params'])
         query = 'Responda apropriadamente, seguindo o formato orientado'
         content = chunk['chunk'].page_content
         output = chain.invoke({'content': content, 'query': query})
