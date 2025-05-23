@@ -10,10 +10,6 @@ async def post_doc(conn: Connection, doc: doc_models.Doc):
         INSERT INTO public.docs(id, name, created_at)
         VALUES (%(id)s, %(name)s, %(created_at)s);
         """
-    SCRIPT_SQL = """
-        INSERT INTO public.docs(id, name, created_at)
-        VALUES (%(id)s, %(id)s, %(created_at)s);
-        """
     await conn.exec(SCRIPT_SQL, params)
 
 

@@ -16,17 +16,9 @@ class Arrange(BaseModel):
     updated_at: Optional[datetime] = None
 
 
-COMMON_DATE_FORMATS = (
-    '%d/%m/%Y',
-    '%Y-%m-%d',
-    '%d-%m-%Y',
-    '%m/%d/%Y',
-    '%Y-%m-%d %H:%M',
-)
-
-
 def try_parse_date(value: str) -> date:
-    for fmt in COMMON_DATE_FORMATS:
+    fmts = ['%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y', '%m/%d/%Y', '%Y-%m-%d %H:%M']
+    for fmt in fmts:
         try:
             return datetime.strptime(value, fmt).date()
         except ValueError:
@@ -64,9 +56,9 @@ class ArrangePatient(BaseModel):
     def parse_flexible_date(cls, v):
         if isinstance(v, date):
             return v
-        if not isinstance(v, str):
-            raise ValueError('Data inválida: valor não é string nem date.')
-        return try_parse_date(v)
+        if isinstance(v, str):
+            return try_parse_date(v)
+        return None
 
 
 class ArrangeDetails(BaseModel):
