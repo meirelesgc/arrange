@@ -12,7 +12,7 @@ from arrange.core.connection import Connection
 from arrange.models import doc_models
 from arrange.repositories import arrange_repository, doc_repository
 
-nlp = spacy.load('pt_core_news_md')
+nlp = spacy.load('pt_core_news_lg')
 
 
 async def get_doc(conn: Connection):
