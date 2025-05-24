@@ -4,9 +4,10 @@ from uuid import UUID
 import spacy
 from fastapi import HTTPException, UploadFile
 from langchain.schema.document import Document
-from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_core.vectorstores import VectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_unstructured import UnstructuredLoader
 
 from arrange.core.connection import Connection
 from arrange.models import doc_models
@@ -21,8 +22,17 @@ async def get_doc(conn: Connection):
 
 
 def load_documents(doc: doc_models.Doc):
-    document_loader = PyPDFLoader(f'storage/{doc.id}.pdf')
-    return document_loader.load()
+    loader = PyMuPDFLoader(f'storage/{doc.id}.pdf')
+    chunks = list(loader.lazy_load())
+    docs = [chunk for chunk in chunks if chunk.page_content]
+    if not docs:
+        loader = UnstructuredLoader(
+            file_path=f'storage/{doc.id}.pdf',
+            strategy='hi_res',
+            languages=['por'],
+        )
+        docs = [chunk for chunk in loader.lazy_load() if chunk.page_content]
+    return docs
 
 
 def split_documents(documents: list[Document]):
@@ -75,6 +85,7 @@ async def add_doc_vectorstore(vectorstore: VectorStore, doc: doc_models.Doc):
     chunks = split_documents(chunks)
     clean_documents(chunks)
     chunks = index_chunks(chunks)
+    chunks = [chunk for chunk in chunks if chunk.page_content]
     await vectorstore.aadd_documents(chunks)
 
 

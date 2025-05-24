@@ -90,6 +90,6 @@ class ArrangeDetails(BaseModel):
     def parse_flexible_date(cls, v):
         if isinstance(v, date):
             return v
-        if not isinstance(v, str):
-            raise ValueError('Data inválida: valor não é string nem date.')
-        return try_parse_date(v)
+        if isinstance(v, str):
+            return try_parse_date(v)
+        return None

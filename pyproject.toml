@@ -23,6 +23,10 @@ dependencies = [
     "testcontainers (>=4.10.0,<5.0.0)",
     "langchain-ollama (>=0.3.2,<0.4.0)",
     "langchain-openai (>=0.3.14,<0.4.0)",
+    "pymupdf (>=1.26.0,<2.0.0)",
+    "langchain-unstructured (>=0.1.6,<0.2.0)",
+    "unstructured[pdf] (>=0.17.2,<0.18.0)",
+    "opencv-python (>=4.11.0.86,<5.0.0.0)",
 ]
 
 [tool.poetry]
