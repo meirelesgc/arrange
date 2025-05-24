@@ -29,7 +29,6 @@ def try_parse_date(value: str) -> date:
         except ValueError:
             continue
     return None
-    raise ValueError(f'Data inválida: formato desconhecido ({value}).')
 
 
 class ArrangePatient(BaseModel):
