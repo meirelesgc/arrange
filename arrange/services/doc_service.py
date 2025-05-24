@@ -1,8 +1,10 @@
+from collections import defaultdict
 from pathlib import Path
 from uuid import UUID
 
 import spacy
 from fastapi import HTTPException, UploadFile
+from langchain.schema import Document
 from langchain.schema.document import Document
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_core.vectorstores import VectorStore
@@ -25,13 +27,31 @@ def load_documents(doc: doc_models.Doc):
     loader = PyMuPDFLoader(f'storage/{doc.id}.pdf')
     chunks = list(loader.lazy_load())
     docs = [chunk for chunk in chunks if chunk.page_content]
+
     if not docs:
         loader = UnstructuredLoader(
             file_path=f'storage/{doc.id}.pdf',
             strategy='hi_res',
             languages=['por'],
         )
-        docs = [chunk for chunk in loader.lazy_load() if chunk.page_content]
+        chunks = [chunk for chunk in loader.lazy_load() if chunk.page_content]
+
+        pages = defaultdict(list)
+        for chunk in chunks:
+            page_number = chunk.metadata.get('page_number')
+            if page_number is not None:
+                pages[page_number].append(chunk)
+
+        docs = []
+        for page_number, page_chunks in pages.items():
+            content = [chunk.page_content for chunk in page_chunks]
+            content = '\n'.join(content)
+            merged_metadata = page_chunks[0].metadata.copy()
+            document = Document(page_content=content, metadata=merged_metadata)
+            docs.append(document)
+    for chunk in docs:
+        print(chunk)
+        print('\n\n---\n\n')
     return docs
 
 
@@ -67,24 +87,10 @@ def index_chunks(chunks):
     return chunks
 
 
-def clean_documents(documents: list[Document]):
-    for doc in documents:
-        text = doc.page_content
-        spacy_doc = nlp(text)
-        spans = [ent for ent in spacy_doc.ents]
-        spans = sorted(spans, key=lambda x: x.start_char, reverse=True)
-
-        for span in spans:
-            start, end = span.start_char, span.end_char
-            text = text[:start] + text[end:]
-        doc.page_content = text
-
-
 async def add_doc_vectorstore(vectorstore: VectorStore, doc: doc_models.Doc):
     chunks = load_documents(doc)
-    chunks = split_documents(chunks)
-    clean_documents(chunks)
-    chunks = index_chunks(chunks)
+    # chunks = split_documents(chunks)
+    # chunks = index_chunks(chunks)
     chunks = [chunk for chunk in chunks if chunk.page_content]
     await vectorstore.aadd_documents(chunks)
 

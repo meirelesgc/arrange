@@ -1,3 +1,4 @@
+import locale
 from datetime import date, datetime
 from typing import Literal, Optional
 from uuid import UUID, uuid4
@@ -17,12 +18,17 @@ class Arrange(BaseModel):
 
 
 def try_parse_date(value: str) -> date:
-    fmts = ['%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y', '%m/%d/%Y', '%Y-%m-%d %H:%M']
+    locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
+    # fmt: off
+    fmts = ['%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y', '%m/%d/%Y', '%Y-%m-%d %H:%M',
+        '%d DE %B DE %Y',]
+    # fmt: on
     for fmt in fmts:
         try:
             return datetime.strptime(value, fmt).date()
         except ValueError:
             continue
+    return None
     raise ValueError(f'Data inválida: formato desconhecido ({value}).')
 
 

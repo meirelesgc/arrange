@@ -4,7 +4,9 @@ from time import time
 from typing import Literal, Optional
 from uuid import UUID
 
+import spacy
 from fastapi import HTTPException
+from langchain.schema.document import Document
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
@@ -14,6 +16,8 @@ from pydantic import BaseModel, Field, create_model
 from arrange.core.connection import Connection
 from arrange.models import arrange_models, param_models
 from arrange.repositories import arrange_repository, param_repository
+
+nlp = spacy.load('pt_core_news_lg')
 
 
 async def get_chunks(vectorstore: VectorStore, id: UUID, query: str):
@@ -188,6 +192,19 @@ def build_metrics_chain(
     return prompt | local_model | parser
 
 
+def clean_documents(doc: list[Document]):
+    text = doc.page_content
+    spacy_doc = nlp(text)
+    spans = [ent for ent in spacy_doc.ents]
+    spans = sorted(spans, key=lambda x: x.start_char, reverse=True)
+
+    for span in spans:
+        print(span)
+        start, end = span.start_char, span.end_char
+        text = text[:start] + text[end:]
+    doc.page_content = text
+
+
 async def put_arrange_metrics(
     conn: Connection,
     vectorstore: VectorStore,
@@ -202,11 +219,11 @@ async def put_arrange_metrics(
             detail='Required parameters not found.',
         )
     chunks = await get_chunks_by_params(vectorstore, params, id)
-
     aggregated_output = {}
     for chunk in chunks.values():
         chain = build_metrics_chain(model, chunk['params'])
         query = 'Responda apropriadamente, seguindo o formato orientado'
+        clean_documents(chunk['chunk'])
         content = chunk['chunk'].page_content
         output = chain.invoke({'content': content, 'query': query})
         for field, value in output.model_dump().items():
