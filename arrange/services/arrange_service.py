@@ -15,7 +15,10 @@ from pydantic import BaseModel, Field, create_model
 
 from arrange.core.connection import Connection
 from arrange.models import arrange_models, param_models
-from arrange.repositories import arrange_repository, param_repository
+from arrange.repositories import (
+    arrange_repository,
+    param_repository,
+)
 
 nlp = spacy.load('pt_core_news_lg')
 
@@ -131,11 +134,12 @@ async def put_arrange_patient(
         updated_at=datetime.now(),
     )
     await arrange_repository.arrange_doc(conn, arrange)
+    await match_patient(conn, output)
     return arrange
 
 
-async def insert_patient(conn, patient: arrange_models.ArrangePatient):
-    await arrange_repository.insert_patient(conn, patient)
+async def match_patient(conn, output: arrange_models.ArrangePatient):
+    await arrange_repository.match_patient(conn, output)
 
 
 async def get_chunks_by_params(

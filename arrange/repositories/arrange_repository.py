@@ -71,3 +71,58 @@ async def patch_arrange(
         WHERE doc_id = %(id)s AND type = %(type)s;
         """
     await conn.exec(SCRIPT_SQL, params)
+
+
+async def match_patient(
+    conn: Connection,
+    output: arrange_models.ArrangePatient,
+):
+    params = output.model_dump(mode='json')
+    SCRIPT_SQL = """
+        SELECT id,
+            COALESCE(similarity(full_name, %(full_name)s), 0) * 2 +
+            CASE
+                WHEN date_of_birth = %(date_of_birth)s THEN 1
+                ELSE 0
+            END +
+            CASE
+                WHEN gender = %(gender)s THEN 0.5
+                ELSE 0
+            END +
+            CASE
+                WHEN date_of_birth = %(date_of_birth)s AND gender = %(gender)s THEN 1
+                ELSE 0
+            END +
+            CASE
+                WHEN phone IS NOT NULL AND phone = %(phone)s THEN 1
+                ELSE 0
+            END +
+            CASE
+                WHEN LOWER(email) = LOWER(%(email)s) THEN 1
+                ELSE COALESCE(similarity(email, %(email)s), 0)
+            END AS similarity
+        FROM public.patients
+        ORDER BY similarity DESC
+    """  # noqa: E501
+    result = await conn.select(SCRIPT_SQL, params, one=True)
+    FILTER = 3
+
+    if result and result.get('similarity', 0) >= FILTER:
+        SCRIPT_SQL = """
+            UPDATE public.patients
+            SET full_name = COALESCE(full_name, %(full_name)s),
+                gender = COALESCE(gender, %(gender)s),
+                phone = COALESCE(phone, %(phone)s),
+                email = COALESCE(email, %(email)s),
+                date_of_birth = COALESCE(date_of_birth, %(date_of_birth)s),
+                updated_at = NOW()
+            WHERE id = %(id)s;
+        """
+        params = output.model_dump(mode='json')
+        params['id'] = result.get('id')
+        return await conn.exec(SCRIPT_SQL, params)
+    SCRIPT_SQL = """
+        INSERT INTO public.patients(full_name, gender, phone, email, date_of_birth)
+        VALUES (%(full_name)s, %(gender)s, %(phone)s, %(email)s, %(date_of_birth)s);
+    """  # noqa: E501
+    return await conn.exec(SCRIPT_SQL, params)
