@@ -39,6 +39,16 @@ CREATE TABLE IF NOT EXISTS arranges (
     updated_at TIMESTAMP,
     CONSTRAINT unique_doc_type UNIQUE (doc_id, type)
 );
+CREATE TABLE IF NOT EXISTS patients (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    full_name VARCHAR(255) UNIQUE NOT NULL,
+    gender VARCHAR(255),
+    phone VARCHAR(255),
+    email VARCHAR(255),
+    date_of_birth DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP
+);
 CREATE TABLE IF NOT EXISTS logs.arranges (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     doc_id UUID REFERENCES docs(id) ON DELETE CASCADE,

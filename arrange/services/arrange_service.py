@@ -134,6 +134,10 @@ async def put_arrange_patient(
     return arrange
 
 
+async def insert_patient(conn, patient: arrange_models.ArrangePatient):
+    await arrange_repository.insert_patient(conn, patient)
+
+
 async def get_chunks_by_params(
     vectorstore: VectorStore,
     params: list[param_models.Param],
