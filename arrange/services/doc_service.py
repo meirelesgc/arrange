@@ -49,9 +49,6 @@ def load_documents(doc: doc_models.Doc):
             merged_metadata = page_chunks[0].metadata.copy()
             document = Document(page_content=content, metadata=merged_metadata)
             docs.append(document)
-    for chunk in docs:
-        print(chunk)
-        print('\n\n---\n\n')
     return docs
 
 

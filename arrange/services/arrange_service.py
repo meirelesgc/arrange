@@ -199,7 +199,6 @@ def clean_documents(doc: list[Document]):
     spans = sorted(spans, key=lambda x: x.start_char, reverse=True)
 
     for span in spans:
-        print(span)
         start, end = span.start_char, span.end_char
         text = text[:start] + text[end:]
     doc.page_content = text
