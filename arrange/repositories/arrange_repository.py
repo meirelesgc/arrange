@@ -123,6 +123,6 @@ async def match_patient(
         return await conn.exec(SCRIPT_SQL, params)
     SCRIPT_SQL = """
         INSERT INTO public.patients(full_name, gender, phone, email, date_of_birth)
-        VALUES (%(full_name)s, %(gender)s, %(phone)s, %(email)s, %(date_of_birth)s);
+        VALUES (%(full_name)s, %(gender)s, %(phone)s, %(email)s, g%(date_of_birth)s);
     """  # noqa: E501
     return await conn.exec(SCRIPT_SQL, params)
