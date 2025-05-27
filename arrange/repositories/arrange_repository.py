@@ -7,6 +7,17 @@ from arrange.core.connection import Connection
 from arrange.models import arrange_models
 
 
+async def export_arranges(conn: Connection):
+    SCRIPT_SQL = """
+        SELECT d.id, d.name, a.output, a.type
+        FROM docs d
+        LEFT JOIN arranges a
+            ON a.doc_id = d.id
+        WHERE a.status = 'DONE'
+        """
+    return await conn.select(SCRIPT_SQL, {}, one=False)
+
+
 async def get_arrange_metrics(
     conn: Connection, id: UUID, type: Literal['DETAILS', 'PATIENTS', 'METRICS']
 ):
@@ -123,6 +134,6 @@ async def match_patient(
         return await conn.exec(SCRIPT_SQL, params)
     SCRIPT_SQL = """
         INSERT INTO public.patients(full_name, gender, phone, email, date_of_birth)
-        VALUES (%(full_name)s, %(gender)s, %(phone)s, %(email)s, g%(date_of_birth)s);
+        VALUES (%(full_name)s, %(gender)s, %(phone)s, %(email)s, %(date_of_birth)s);
     """  # noqa: E501
     return await conn.exec(SCRIPT_SQL, params)

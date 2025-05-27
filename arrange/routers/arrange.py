@@ -2,6 +2,7 @@ from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
+from fastapi.responses import FileResponse
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.vectorstores import VectorStore
 
@@ -109,3 +110,16 @@ async def patch_patient(
     id: UUID, output: dict, conn: Connection = Depends(get_conn)
 ):
     return await arrange_service.patch_arrange(id, output, 'PATIENTS', conn)
+
+
+@router.get(
+    '/arrange/export/', status_code=HTTPStatus.OK, response_class=FileResponse
+)
+async def export_arranges(conn: Connection = Depends(get_conn)):
+    await arrange_service.export_arranges(conn)
+    file_path = 'storage/export.csv'
+    return FileResponse(
+        path=file_path,
+        media_type='text/csv',
+        filename='export.csv',
+    )

@@ -4,6 +4,7 @@ from time import time
 from typing import Literal, Optional
 from uuid import UUID
 
+import pandas as pd
 import spacy
 from fastapi import HTTPException
 from langchain.schema.document import Document
@@ -266,3 +267,38 @@ async def patch_arrange(
     conn: Connection,
 ):
     await arrange_repository.patch_arrange(id, output, type, conn)
+
+
+def normalize_dict(data: dict) -> dict:
+    return {
+        key: (value[0] if isinstance(value, list) and value else None)
+        for key, value in data.items()
+    }
+
+
+async def export_arranges(conn: Connection):
+    arranges = await arrange_repository.export_arranges(conn)
+    if not arranges:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='No arranges found.',
+        )
+    arranges = pd.DataFrame(arranges)
+    arranges = arranges.pivot_table(
+        index=['id', 'name'],
+        columns='type',
+        values='output',
+        aggfunc='first',
+        fill_value={},
+    ).reset_index()
+
+    arranges.columns = [
+        col.lower() if isinstance(col, str) else col
+        for col in arranges.columns
+    ]
+
+    for col in ['metrics', 'details', 'patients']:
+        if col in arranges.columns:
+            arranges[col] = arranges[col].apply(normalize_dict)
+
+    arranges.to_csv('storage/export.csv', index=False, encoding='utf-8-sig')
