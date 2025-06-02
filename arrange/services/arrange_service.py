@@ -1,3 +1,4 @@
+import zipfile
 from datetime import datetime
 from http import HTTPStatus
 from time import time
@@ -269,13 +270,6 @@ async def patch_arrange(
     await arrange_repository.patch_arrange(id, output, type, conn)
 
 
-def normalize_dict(data: dict) -> dict:
-    return {
-        key: (value[0] if isinstance(value, list) and value else None)
-        for key, value in data.items()
-    }
-
-
 async def export_arranges(conn: Connection):
     arranges = await arrange_repository.export_arranges(conn)
     if not arranges:
@@ -297,8 +291,53 @@ async def export_arranges(conn: Connection):
         for col in arranges.columns
     ]
 
-    for col in ['metrics', 'details', 'patients']:
-        if col in arranges.columns:
-            arranges[col] = arranges[col].apply(normalize_dict)
+    if 'details' in arranges.columns:
+        keys = [
+            'hospital_name',
+            'cnpj',
+            'document_type',
+            'issued_by',
+            'printing_datetime',
+        ]
+        details = arranges[['id', 'name', 'details']]
+        _ = (
+            details['details']
+            .apply(lambda x: {k: x.get(k, 0) for k in keys})
+            .apply(pd.Series)
+        )
+        details = pd.concat([details.drop(columns=['details']), _], axis=1)
+    if 'patients' in arranges.columns:
+        keys = [
+            'full_name',
+            'date_of_birth',
+            'gender',
+            'phone',
+            'email',
+            'admission_date',
+        ]
+        patients = arranges[['id', 'name', 'patients']]
+        _ = (
+            patients['patients']
+            .apply(lambda x: {k: x.get(k, 0) for k in keys})
+            .apply(pd.Series)
+        )
+        patients = pd.concat([patients.drop(columns=['patients']), _], axis=1)
+    if 'metrics' in arranges.columns:
+        keys = await param_repository.get_param(conn)
+        keys = [key['name'].lower().replace(' ', '_') for key in keys]
+        metrics = arranges[['id', 'name', 'metrics']]
+        _ = (
+            metrics['metrics']
+            .apply(lambda x: {k: x.get(k, 0) for k in keys})
+            .apply(pd.Series)
+        )
+        metrics = pd.concat([metrics.drop(columns=['metrics']), _], axis=1)
 
-    arranges.to_csv('storage/export.csv', index=False, encoding='utf-8-sig')
+    details.replace('null', None).to_csv('details.csv', index=False)
+    patients.replace('null', None).to_csv('patients.csv', index=False)
+    metrics.replace('null', None).to_csv('metrics.csv', index=False)
+
+    with zipfile.ZipFile('storage/export.zip', 'w') as zipf:
+        zipf.write('details.csv')
+        zipf.write('patients.csv')
+        zipf.write('metrics.csv')

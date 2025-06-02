@@ -115,9 +115,9 @@ async def patch_patient(
 @router.get('/arrange/export/', status_code=HTTPStatus.OK)
 async def export_arranges(conn: Connection = Depends(get_conn)):
     await arrange_service.export_arranges(conn)
-    file_path = 'storage/export.csv'
+    file_path = 'storage/export.zip'
     return FileResponse(
         path=file_path,
-        media_type='text/csv',
-        headers={'Content-Disposition': 'attachment; filename="export.csv"'},
+        media_type='application/zip',
+        headers={'Content-Disposition': 'attachment; filename="export.zip"'},
     )
