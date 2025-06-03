@@ -5,7 +5,6 @@ from uuid import UUID
 import spacy
 from fastapi import HTTPException, UploadFile
 from langchain.schema import Document
-from langchain.schema.document import Document
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_core.vectorstores import VectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
