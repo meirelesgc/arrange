@@ -1,47 +1,48 @@
 services:
-  arrange-postgres:
-    image: pgvector/pgvector:pg17
-    container_name: arrange-postgres
-    environment:
-      POSTGRES_DB: arrange
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - arrange-postgres:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d arrange" ]
-      interval: 10s
+    arrange-postgres:
+        image: pgvector/pgvector:pg17
+        container_name: arrange-postgres
+        environment:
+            POSTGRES_DB: arrange
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+        ports:
+            - "5432:5432"
+        volumes:
+            - arrange-postgres:/var/lib/postgresql/data
+            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+        restart: unless-stopped
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U postgres -d arrange" ]
+            interval: 10s
 
-  arrange:
-    image: arrange
-    container_name: arrange
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
-    restart: unless-stopped
-    depends_on:
-      arrange-postgres:
-        condition: service_healthy
-    volumes:
-      - ./storage:/app/storage
+    arrange:
+        image: arrange
+        container_name: arrange
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "8000:8000"
+        restart: unless-stopped
+        depends_on:
+            arrange-postgres:
+                condition: service_healthy
+        volumes:
+            - ./storage:/app/storage
 
-  ollama:
-    image: ollama/ollama
-    container_name: ollama
-    ports:
-      - "11434:11434"
-    environment:
-      - OLLAMA_HOST=0.0.0.0:11434
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
-    volumes:
-      - ollama:/root/.ollama
-    restart: unless-stopped
+    ollama:
+        image: ollama/ollama
+        container_name: ollama
+        ports:
+            - "11434:11434"
+        environment:
+            - OLLAMA_HOST=0.0.0.0:11434
+            - NVIDIA_VISIBLE_DEVICES=all
+            - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+        volumes:
+            - ollama:/root/.ollama
+        restart: unless-stopped
 volumes:
-  arrange-postgres:
+    arrange-postgres:
+    ollama:

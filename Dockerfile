@@ -1,8 +1,19 @@
 FROM python:3.12-slim
 
-ENV POETRY_VIRTUALENVS_CREATE=false
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev \
+    locales \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install -y libpq-dev
+RUN echo "pt_BR.UTF-8 UTF-8" >> /etc/locale.gen && \
+    locale-gen pt_BR.UTF-8 && \
+    update-locale LANG=pt_BR.UTF-8
+
+ENV LANG pt_BR.UTF-8
+ENV LANGUAGE pt_BR:pt
+ENV LC_ALL pt_BR.UTF-8
+
+ENV POETRY_VIRTUALENVS_CREATE=false
 
 WORKDIR /app
 

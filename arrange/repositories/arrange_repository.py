@@ -4,10 +4,13 @@ from typing import Literal
 from uuid import UUID
 
 from arrange.core.connection import Connection
-from arrange.models import arrange_models
+from arrange.models import arrange_models, patient_models
 
 
-async def export_arranges(conn: Connection):
+async def export_arranges(
+    conn: Connection,
+    patients: list[patient_models.Patient],
+):
     SCRIPT_SQL = """
         SELECT d.id, d.name, a.output, a.type
         FROM docs d

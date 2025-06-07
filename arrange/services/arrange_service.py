@@ -16,7 +16,7 @@ from langchain_core.vectorstores import VectorStore
 from pydantic import BaseModel, Field, create_model
 
 from arrange.core.connection import Connection
-from arrange.models import arrange_models, param_models
+from arrange.models import arrange_models, param_models, patient_models
 from arrange.repositories import (
     arrange_repository,
     param_repository,
@@ -270,8 +270,11 @@ async def patch_arrange(
     await arrange_repository.patch_arrange(id, output, type, conn)
 
 
-async def export_arranges(conn: Connection):
-    arranges = await arrange_repository.export_arranges(conn)
+async def export_arranges(
+    conn: Connection,
+    patients: list[patient_models.Patient],
+):
+    arranges = await arrange_repository.export_arranges(conn, patients)
     if not arranges:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
