@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from arrange.core.database import conn
@@ -10,6 +11,7 @@ from arrange.routers import arrange, docs, param, patient, users
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await conn.connect()
+    app.state.last_request_time = None
     yield
     await conn.disconnect()
 
@@ -28,6 +30,22 @@ app.add_middleware(
     allow_headers=['*'],
     allow_credentials=True,
 )
+
+
+@app.middleware('http')
+async def track_last_request_time(request: Request, call_next):
+    request.app.state.last_request_time = datetime.now(UTC)
+    response = await call_next(request)
+    return response
+
+
+@app.get('/last-request')
+async def get_last_request_time(request: Request):
+    last_time = request.app.state.last_request_time
+    if last_time is None:
+        return {'last_request_time': None}
+    return {'last_request_time': last_time.isoformat()}
+
 
 app.include_router(docs.router, tags=['docs'])
 app.include_router(users.router, tags=['users'])
