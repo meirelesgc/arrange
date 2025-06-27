@@ -39,14 +39,6 @@ async def track_last_request_time(request: Request, call_next):
     return response
 
 
-@app.get('/last-request')
-async def get_last_request_time(request: Request):
-    last_time = request.app.state.last_request_time
-    if last_time is None:
-        return {'last_request_time': None}
-    return {'last_request_time': last_time.isoformat()}
-
-
 app.include_router(docs.router, tags=['docs'])
 app.include_router(users.router, tags=['users'])
 app.include_router(arrange.router, tags=['arrange'])
@@ -57,3 +49,11 @@ app.include_router(patient.router, tags=['patient'])
 @app.get('/')
 async def read_root():
     return {'message': 'Working'}
+
+
+@app.get('/last-request')
+async def get_last_request_time(request: Request):
+    last_time = request.app.state.last_request_time
+    if last_time is None:
+        return {'last_request_time': None}
+    return {'last_request_time': last_time.isoformat()}
