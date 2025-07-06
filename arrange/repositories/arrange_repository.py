@@ -95,26 +95,12 @@ async def match_patient(
     SCRIPT_SQL = """
         SELECT id,
             COALESCE(similarity(full_name, %(full_name)s), 0) * 2 +
-            CASE
-                WHEN date_of_birth = %(date_of_birth)s THEN 1
-                ELSE 0
-            END +
-            CASE
-                WHEN gender = %(gender)s THEN 0.5
-                ELSE 0
-            END +
-            CASE
-                WHEN date_of_birth = %(date_of_birth)s AND gender = %(gender)s THEN 1
-                ELSE 0
-            END +
-            CASE
-                WHEN phone IS NOT NULL AND phone = %(phone)s THEN 1
-                ELSE 0
-            END +
-            CASE
-                WHEN LOWER(email) = LOWER(%(email)s) THEN 1
-                ELSE COALESCE(similarity(email, %(email)s), 0)
-            END AS similarity
+            CASE WHEN date_of_birth = %(date_of_birth)s THEN 1 ELSE 0 END +
+            CASE WHEN gender = %(gender)s THEN 0.5 ELSE 0 END +
+            CASE WHEN date_of_birth = %(date_of_birth)s AND gender = %(gender)s THEN 1 ELSE 0 END +
+            CASE WHEN phone IS NOT NULL AND phone = %(phone)s THEN 1 ELSE 0 END +
+            CASE WHEN LOWER(email) = LOWER(%(email)s) THEN 1 ELSE COALESCE(similarity(email, %(email)s), 0) END
+            AS similarity
         FROM public.patients
         ORDER BY similarity DESC
     """  # noqa: E501
@@ -134,9 +120,13 @@ async def match_patient(
         """
         params = output.model_dump(mode='json')
         params['id'] = result.get('id')
-        return await conn.exec(SCRIPT_SQL, params)
-    SCRIPT_SQL = """
-        INSERT INTO public.patients(full_name, gender, phone, email, date_of_birth)
-        VALUES (%(full_name)s, %(gender)s, %(phone)s, %(email)s, %(date_of_birth)s);
-    """  # noqa: E501
-    return await conn.exec(SCRIPT_SQL, params)
+        await conn.exec(SCRIPT_SQL, params)
+        return
+
+    if params.get('full_name'):
+        SCRIPT_SQL = """
+            INSERT INTO public.patients(full_name, gender, phone, email, date_of_birth)
+            VALUES (%(full_name)s, %(gender)s, %(phone)s, %(email)s, %(date_of_birth)s);
+        """  # noqa: E501
+        await conn.exec(SCRIPT_SQL, params)
+        return

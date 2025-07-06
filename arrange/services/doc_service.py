@@ -23,10 +23,9 @@ async def get_doc(conn: Connection):
 
 
 def load_documents(doc: doc_models.Doc):
-    loader = PyMuPDFLoader(f'storage/{doc.id}.pdf')
+    loader = PyMuPDFLoader(f'storage/{doc.id}.pdf', extract_images=False)
     chunks = list(loader.lazy_load())
     docs = [chunk for chunk in chunks if chunk.page_content]
-
     if not docs:
         loader = UnstructuredLoader(
             file_path=f'storage/{doc.id}.pdf',
@@ -48,6 +47,7 @@ def load_documents(doc: doc_models.Doc):
             merged_metadata = page_chunks[0].metadata.copy()
             document = Document(page_content=content, metadata=merged_metadata)
             docs.append(document)
+
     return docs
 
 
@@ -97,11 +97,9 @@ async def post_doc(
     doc = doc_models.Doc(name=file.filename)
     with open(f'storage/{doc.id}.pdf', 'wb') as buffer:
         buffer.write(file.file.read())
-    # --- INSERT
     await add_doc_vectorstore(vectorstore, doc)
     await doc_repository.post_doc(conn, doc)
     await arrange_repository.post_doc(conn, doc.id)
-    # ---
     return doc
 
 
