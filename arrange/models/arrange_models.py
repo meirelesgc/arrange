@@ -78,7 +78,8 @@ class ArrangeDetails(BaseModel):
             'MEDICAL_CERTIFICATE', 'CONSENT_TERMS', 'MEDICAL_RECORD',
         ]] = Field(
         default=None,
-        description='Tipo do documento clínico (ex: Evolução, Carta de Acompanhamento).',
+        description=('Tipo do documento clínico (ex: Evolução, ',
+                     'Carta de Acompanhamento).'),
     )
     # fmt: on
     issued_by: Optional[str] = Field(
@@ -87,7 +88,10 @@ class ArrangeDetails(BaseModel):
     )
     printing_datetime: Optional[date] = Field(
         default=None,
-        description='Data de emissão ou impressão do documento (formato: AAAA-MM-DD).',
+        description=(
+            'Data de emissão ou impressão do documento ',
+            '(formato: AAAA-MM-DD).',
+        ),
     )
 
     @field_validator('printing_datetime', mode='before')

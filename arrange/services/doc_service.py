@@ -5,7 +5,6 @@ from uuid import UUID
 import spacy
 from fastapi import HTTPException, UploadFile
 from langchain.schema import Document
-from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_core.vectorstores import VectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_unstructured import UnstructuredLoader
@@ -23,7 +22,11 @@ async def get_doc(conn: Connection):
 
 
 def load_documents(doc: doc_models.Doc):
-    loader = PyMuPDFLoader(f'storage/{doc.id}.pdf', extract_images=False)
+    loader = UnstructuredLoader(
+        file_path=f'storage/{doc.id}.pdf',
+        strategy='fast',
+        languages=['por'],
+    )
     chunks = list(loader.lazy_load())
     docs = [chunk for chunk in chunks if chunk.page_content]
     if not docs:

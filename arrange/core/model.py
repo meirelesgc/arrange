@@ -16,7 +16,7 @@ local_model = ChatOllama(
 
 
 async def get_local_model():
-    return local_model
+    return model
 
 
 async def get_model():
