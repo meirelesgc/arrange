@@ -4,11 +4,16 @@ from arrange.core.connection import Connection
 from arrange.models import param_models
 
 
-async def post_param(conn: Connection, param: param_models.Param):
+async def post_param(
+    conn: Connection,
+    param: param_models.Param,
+    current_user,
+):
     params = param.model_dump()
+    params['created_by'] = current_user.id
     SCRIPT_SQL = """
-        INSERT INTO public.params (id, name, synonyms, created_at)
-        VALUES (%(id)s, %(name)s, %(synonyms)s, %(created_at)s);
+        INSERT INTO public.params (id, name, synonyms, created_by, created_at)
+        VALUES (%(id)s, %(name)s, %(synonyms)s, %(created_by)s, %(created_at)s);
         """
     await conn.exec(SCRIPT_SQL, params)
 

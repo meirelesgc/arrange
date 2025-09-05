@@ -10,7 +10,7 @@ from arrange.core.connection import Connection
 from arrange.core.database import get_conn
 from arrange.core.model import get_local_model, get_model
 from arrange.core.vectorstore import get_vectorstore
-from arrange.models import arrange_models, patient_models
+from arrange.models import arrange_models
 from arrange.services import arrange_service
 
 router = APIRouter()
@@ -114,10 +114,11 @@ async def patch_patient(
 
 @router.get('/arrange/export/', status_code=HTTPStatus.OK)
 async def export_arranges(
-    patients: list[patient_models.Patient],
+    # patients: list[patient_models.Patient],
     conn: Connection = Depends(get_conn),
 ):
-    await arrange_service.export_arranges(conn, patients)
+    await arrange_service.export_arranges(conn, [])
+    # await arrange_service.export_arranges(conn, patients)
     file_path = 'storage/export.zip'
     return FileResponse(
         path=file_path,

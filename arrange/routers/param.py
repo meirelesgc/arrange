@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends
 
 from arrange.core.connection import Connection
 from arrange.core.database import get_conn
-from arrange.models import param_models
+from arrange.models import param_models, user_models
+from arrange.security import get_current_user
 from arrange.services import param_service
 
 router = APIRouter()
@@ -19,8 +20,9 @@ router = APIRouter()
 async def post_param(
     param: param_models.CreateParam,
     conn: Connection = Depends(get_conn),
+    current_user: user_models.User = Depends(get_current_user),
 ):
-    return await param_service.post_param(conn, param)
+    return await param_service.post_param(conn, param, current_user)
 
 
 @router.get(

@@ -238,7 +238,6 @@ async def put_arrange_metrics(
         for field, value in output.model_dump().items():
             if field not in aggregated_output:
                 aggregated_output[field] = []
-
             if value is not None:
                 aggregated_output[field].append(value)
 

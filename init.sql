@@ -4,9 +4,18 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE SCHEMA logs;
 
 CREATE TYPE status_type AS ENUM ('STANDBY', 'IN-PROCESS', 'FAILED', 'DONE');
-CREATE TYPE role_type AS ENUM ('ADMIN', 'DEFAULT');
+CREATE TYPE role_type AS ENUM ('ADMIN', 'DEFAULT', 'TECHNICIAN');
 CREATE TYPE arrange_type AS ENUM ('DETAILS', 'PATIENTS', 'METRICS');
 
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    username VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role role_type NOT NULL DEFAULT 'DEFAULT',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP
+);
 CREATE TABLE IF NOT EXISTS docs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) UNIQUE NOT NULL,
@@ -18,15 +27,7 @@ CREATE TABLE IF NOT EXISTS params (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) UNIQUE NOT NULL,
     synonyms TEXT[] DEFAULT '{}',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP
-);
-CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    username VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role role_type NOT NULL DEFAULT 'DEFAULT',
+    created_by UUID REFERENCES users(id) ON UPDATE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP
 );

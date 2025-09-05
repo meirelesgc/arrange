@@ -6,9 +6,13 @@ from arrange.models import param_models
 from arrange.repositories import param_repository
 
 
-async def post_param(conn: Connection, param: param_models.CreateParam):
+async def post_param(
+    conn: Connection,
+    param: param_models.CreateParam,
+    current_user,
+):
     param = param_models.Param(**param.model_dump())
-    await param_repository.post_param(conn, param)
+    await param_repository.post_param(conn, param, current_user)
     return param
 
 

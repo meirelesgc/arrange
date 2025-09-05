@@ -35,6 +35,17 @@ async def get_user(conn: Connection = Depends(get_conn)):
 
 
 @router.get(
+    '/user/my-self/',
+    status_code=HTTPStatus.OK,
+    response_model=user_models.UserResponse,
+)
+async def get_my_self(
+    current_user: user_models.User = Depends(get_current_user),
+):
+    return current_user
+
+
+@router.get(
     '/user/{id}/',
     status_code=HTTPStatus.OK,
     response_model=user_models.UserResponse,
